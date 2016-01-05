@@ -1,2 +1,3 @@
-# stataz_api
-The backend for the stataz short-status-service
+# Stataz Api
+
+The official backend for the Stataz simple-status-service
