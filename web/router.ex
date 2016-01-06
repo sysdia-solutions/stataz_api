@@ -1,26 +1,17 @@
 defmodule StatazApi.Router do
   use StatazApi.Web, :router
 
-  pipeline :browser do
-    plug :accepts, ["html"]
-    plug :fetch_session
-    plug :fetch_flash
-    plug :protect_from_forgery
-    plug :put_secure_browser_headers
-  end
-
   pipeline :api do
     plug :accepts, ["json"]
   end
 
-  scope "/", StatazApi do
-    pipe_through :browser # Use the default browser stack
+  scope "/users", StatazApi do
+    pipe_through :api
 
-    get "/", PageController, :index
+    post "/", UserController, :create
+
+    get "/:username", UserController, :show
+    delete "/:username", UserController, :delete
+    put "/:username", UserController, :update
   end
-
-  # Other scopes may use custom stacks.
-  # scope "/api", StatazApi do
-  #   pipe_through :api
-  # end
 end
