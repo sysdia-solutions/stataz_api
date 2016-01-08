@@ -5,19 +5,18 @@ defmodule StatazApi.UserController.ActionUpdate do
   def execute(conn, username) do
     user_params = conn.body_params
     Repo.get_by(User, %{username: username})
-    |> update(conn, username, user_params)
+    |> update(conn, user_params)
   end
 
-  defp update(user = %User{}, conn, _username, user_params) do
+  defp update(user = %User{}, conn, user_params) do
     User.update_changeset(user, user_params)
     |> Repo.update()
     |> response(conn)
   end
 
-  defp update(nil, conn, username, _user_params) do
-    error = %StatazApi.Error.NotFound{resource: "User", id: username}
+  defp update(nil, conn, _user_params) do
     put_status(conn, :not_found)
-    |> render("show.json", error: error)
+    |> render("show.json", error: :not_found)
   end
 
   defp response({:ok, user}, conn) do

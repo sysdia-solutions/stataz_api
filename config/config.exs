@@ -5,6 +5,10 @@
 # is restricted to this project.
 use Mix.Config
 
+# General Configuration
+config :stataz_api,
+  access_token_expires: System.get_env("ENV_STATAZAPI_ACCESS_TOKEN_EXPIRES") || "3600" |> String.to_integer
+
 # Configures the endpoint
 config :stataz_api, StatazApi.Endpoint,
   url: [host: "localhost"],
