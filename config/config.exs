@@ -22,6 +22,8 @@ config :stataz_api, StatazApi.Endpoint,
 config :stataz_api, StatazApi.Repo,
   adapter: Ecto.Adapters.Postgres,
   hostname: "localhost",
+  username: System.get_env("ENV_STATAZAPI_DB_USERNAME") || "postgres",
+  database: System.get_env("ENV_STATAZAPI_DB_DATABASE") || "database",
   pool_size: 10
 
 # Configures Elixir's Logger
