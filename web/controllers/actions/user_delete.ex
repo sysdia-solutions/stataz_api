@@ -4,17 +4,16 @@ defmodule StatazApi.UserController.ActionDelete do
 
   def execute(conn, username) do
     Repo.get_by(User, %{username: username})
-    |> delete(conn, username)
+    |> delete(conn)
   end
 
-  defp delete(user = %User{}, conn, _username) do
+  defp delete(user = %User{}, conn) do
     Repo.delete!(user)
     send_resp(conn, :no_content, "")
   end
 
-  defp delete(nil, conn, username) do
-    error = %StatazApi.Error.NotFound{resource: "User", id: username}
+  defp delete(nil, conn) do
     put_status(conn, :not_found)
-    |> render("show.json", error: error)
+    |> render("show.json", error: :not_found)
   end
 end

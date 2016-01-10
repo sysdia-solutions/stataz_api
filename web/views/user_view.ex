@@ -6,7 +6,9 @@ defmodule StatazApi.UserView do
   end
 
   def render("show.json", %{error: error}) do
-    error
+    %{errors:
+      %{ title: StatazApi.ErrorHelpers.translate_error(to_string(error)) }
+    }
   end
 
   def render("user.json", %{user: user}) do

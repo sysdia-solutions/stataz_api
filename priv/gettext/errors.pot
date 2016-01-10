@@ -94,3 +94,13 @@ msgid "must be equal to %{count}"
 msgid_plural "must be equal to %{count}"
 msgstr[0] ""
 msgstr[1] ""
+
+## From HTTP Status Codes
+msgid "not_found"
+msgstr ""
+
+msgid "unauthorized"
+msgstr ""
+
+msgid "unprocessable_entity"
+msgstr ""

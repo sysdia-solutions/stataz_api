@@ -4,16 +4,15 @@ defmodule StatazApi.UserController.ActionShow do
 
   def execute(conn, username) do
     Repo.get_by(User, %{username: username})
-    |> response(conn, username)
+    |> response(conn)
   end
 
-  defp response(user = %User{}, conn, _username) do
+  defp response(user = %User{}, conn) do
     render(conn, "show.json", user: user)
   end
 
-  defp response(nil, conn, username) do
-    error = %StatazApi.Error.NotFound{resource: "User", id: username}
+  defp response(nil, conn) do
     put_status(conn, :not_found)
-    |> render(error: error)
+    |> render("show.json", error: :not_found)
   end
 end

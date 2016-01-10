@@ -97,3 +97,13 @@ msgid "must be equal to %{count}"
 msgid_plural "must be equal to %{count}"
 msgstr[0] ""
 msgstr[1] ""
+
+## From HTTP Status Codes
+msgid "not_found"
+msgstr "Resource can't be found"
+
+msgid "unauthorized"
+msgstr "Authentication failed"
+
+msgid "unprocessable_entity"
+msgstr "Semantic errors"
