@@ -18,12 +18,17 @@ defmodule StatazApi.AccessToken do
     where: t.token_hash == ^hash(token)
   end
 
-  def delete_for_user_id_and_token(user_id, token) do
+  def get_by_user_id(user_id) do
+    from t in StatazApi.AccessToken,
+    where: t.user_id == ^user_id
+  end
+
+  def get_by_user_id_and_token(user_id, token) do
     from t in StatazApi.AccessToken,
     where: t.user_id == ^user_id and t.token_hash == ^hash(token)
   end
 
-  def delete_all_expired(datetime) do
+  def get_all_expired(datetime) do
     from t in StatazApi.AccessToken,
     where: t.expires <= ^datetime
   end

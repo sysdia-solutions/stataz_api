@@ -4,7 +4,7 @@ defmodule StatazApi.UserControllerTest do
   alias StatazApi.TestCommon
   alias StatazApi.User
 
-  @default_user %User{username: "luke.skywalker", password_hash: "rebellion", email: "luke@skywalker.com"}
+  @default_user %User{username: "luke.skywalker", password: "rebellion", password_hash: "rebellion", email: "luke@skywalker.com"}
   @invalid_attrs %{}
 
   setup %{conn: conn} do
@@ -85,39 +85,95 @@ defmodule StatazApi.UserControllerTest do
   end
 
   test "updates email, password and renders chosen resource when data is valid", %{conn: conn} do
-    user_luke = Repo.insert!(@default_user)
+    user_luke = TestCommon.create_user(Repo, @default_user.username, @default_user.password, @default_user.email)
 
-    update_attrs = %{password: "princess", email: "leia@organa.com"}
+    update_attrs = %{old_password: @default_user.password, new_password: "darksidesith", email: "luke@darkside.com"}
     conn = authenticate(conn, Repo, user_luke.id, 3600)
     put(conn, user_path(conn, :update), update_attrs)
     updated_user = Repo.get_by(User, %{username: "luke.skywalker"})
 
     assert updated_user.password_hash != user_luke.password_hash
-    assert updated_user.email == "leia@organa.com"
+    assert updated_user.email == "luke@darkside.com"
   end
 
   test "updates email only and renders chosen resource when data is valid", %{conn: conn} do
     user_luke = Repo.insert!(@default_user)
 
-    update_attrs = %{email: "leia@organa.com"}
+    update_attrs = %{email: "luke@darkside.com"}
     conn = authenticate(conn, Repo, user_luke.id, 3600)
     put(conn, user_path(conn, :update), update_attrs)
     updated_user = Repo.get_by(User, %{username: "luke.skywalker"})
 
     assert updated_user.password_hash == user_luke.password_hash
-    assert updated_user.email == "leia@organa.com"
+    assert updated_user.email == "luke@darkside.com"
   end
 
   test "updates password only and renders chosen resource when data is valid", %{conn: conn} do
-    user_luke = Repo.insert!(@default_user)
+    user_luke = TestCommon.create_user(Repo, @default_user.username, @default_user.password, @default_user.email)
 
-    update_attrs = %{password: "princess"}
+    update_attrs = %{old_password: @default_user.password, new_password: "farmerboy"}
     conn = authenticate(conn, Repo, user_luke.id, 3600)
     put(conn, user_path(conn, :update), update_attrs)
-    updated_user = Repo.get_by(User, %{username: "luke.skywalker"})
+    updated_user = Repo.get(User, user_luke.id)
 
     assert updated_user.password_hash != user_luke.password_hash
     assert updated_user.email == "luke@skywalker.com"
+  end
+
+  test "update password destroys all existing access tokens", %{conn: conn} do
+    user_luke = TestCommon.create_user(Repo, @default_user.username, @default_user.password, @default_user.email)
+    TestCommon.build_token(Repo, user_luke.id, "secret-plans", 3600)
+
+    update_attrs = %{old_password: @default_user.password, new_password: "farmerboy"}
+    conn = authenticate(conn, Repo, user_luke.id, 3600)
+    put(conn, user_path(conn, :update), update_attrs)
+
+    refute Repo.get_by(StatazApi.AccessToken, %{user_id: user_luke.id})
+  end
+
+  test "does not update chosen resource when password is explicitly supplied", %{conn: conn} do
+    user_luke = TestCommon.create_user(Repo, @default_user.username, @default_user.password, @default_user.email)
+
+    update_attrs = %{password: "farmerboy"}
+    conn = authenticate(conn, Repo, user_luke.id, 3600)
+    put(conn, user_path(conn, :update), update_attrs)
+    updated_user = Repo.get(User, user_luke.id)
+
+    assert updated_user.password_hash == user_luke.password_hash
+  end
+
+  test "does not update chosen resource when only old_password is supplied", %{conn: conn} do
+    user_luke = TestCommon.create_user(Repo, @default_user.username, @default_user.password, @default_user.email)
+
+    update_attrs = %{old_password: @default_user.password}
+    conn = authenticate(conn, Repo, user_luke.id, 3600)
+    put(conn, user_path(conn, :update), update_attrs)
+    updated_user = Repo.get(User, user_luke.id)
+
+    assert updated_user.password_hash == user_luke.password_hash
+  end
+
+  test "does not update chosen resource when only new_password is supplied", %{conn: conn} do
+    user_luke = TestCommon.create_user(Repo, @default_user.username, @default_user.password, @default_user.email)
+
+    update_attrs = %{new_password: "farmerboy"}
+    conn = authenticate(conn, Repo, user_luke.id, 3600)
+    put(conn, user_path(conn, :update), update_attrs)
+    updated_user = Repo.get(User, user_luke.id)
+
+    assert updated_user.password_hash == user_luke.password_hash
+  end
+
+  test "does not update chosen resource and returns errors when only old_password is invalid", %{conn: conn} do
+    user_luke = TestCommon.create_user(Repo, @default_user.username, @default_user.password, @default_user.email)
+
+    update_attrs = %{old_password: "sith-hacker", new_password: "farmerboy"}
+    conn = authenticate(conn, Repo, user_luke.id, 3600)
+    conn = put(conn, user_path(conn, :update), update_attrs)
+    updated_user = Repo.get(User, user_luke.id)
+
+    assert updated_user.password_hash == user_luke.password_hash
+    assert json_response(conn, 401)["errors"]["title"] == "Authentication failed"
   end
 
   test "does not update chosen resource and renders errors when email is not unique", %{conn: conn} do
@@ -150,9 +206,9 @@ defmodule StatazApi.UserControllerTest do
   end
 
   test "does not update resource and renders errors when password is invalid", %{conn: conn} do
-    user_luke = Repo.insert!(@default_user)
+    user_luke = TestCommon.create_user(Repo, @default_user.username, @default_user.password, @default_user.email)
 
-    update_attrs = %{password: "rebel"}
+    update_attrs = %{old_password: @default_user.password, new_password: "rebel"}
     conn = authenticate(conn, Repo, user_luke.id, 3600)
     conn = put(conn, user_path(conn, :update), update_attrs)
 
