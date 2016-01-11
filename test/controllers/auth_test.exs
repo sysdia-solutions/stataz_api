@@ -74,6 +74,26 @@ defmodule StatazApi.AuthTest do
     assert conn.assigns.current_user
   end
 
+  test "purge_tokens deletes all tokens associated to a user when authorized", %{conn: conn} do
+    user_luke = TestCommon.create_user(Repo, @default_user.username, @default_user.password, @default_user.email)
+    TestCommon.build_token(Repo, user_luke.id, @default_token, 3600)
+    TestCommon.build_token(Repo, user_luke.id, "secret_plans", 3600)
+    conn = assign(conn, :current_user, user_luke)
+
+    Auth.purge_tokens(conn, Repo)
+
+    refute Repo.get_by(StatazApi.AccessToken, user_id: user_luke.id)
+  end
+
+  test "purge_tokens does not delete tokens when unauthorized", %{conn: conn} do
+    user_luke = TestCommon.create_user(Repo, @default_user.username, @default_user.password, @default_user.email)
+    TestCommon.build_token(Repo, user_luke.id, @default_token, 3600)
+
+    Auth.purge_tokens(conn, Repo)
+
+    assert Repo.get_by(StatazApi.AccessToken, user_id: user_luke.id)
+  end
+
   test "show_token returns token", %{conn: conn} do
     user_luke = TestCommon.create_user(Repo, @default_user.username, @default_user.password, @default_user.email)
     TestCommon.build_token(Repo, user_luke.id, @default_token, 3600)
