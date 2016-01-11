@@ -23,7 +23,7 @@ defmodule StatazApi.AuthControllerTest do
 
     assert json_response(conn, 201)["data"]["token_type"] == "bearer"
     assert json_response(conn, 201)["data"]["expires_in"] == 3600
-    assert json_response(conn, 201)["data"]["access_token"] |> String.length == 32
+    assert json_response(conn, 201)["data"]["access_token"] |> String.length == 64
   end
 
   test "does not create resource and returns error when resource not found", %{conn: conn} do
@@ -41,7 +41,7 @@ defmodule StatazApi.AuthControllerTest do
   test "shows chosen resource when authenticated", %{conn: conn} do
     user_luke = TestCommon.create_user(Repo, @default_user.username, @default_user.password, @default_user.email)
     conn = authenticate(conn, Repo, user_luke.id, 3600)
-    conn = get(conn, auth_path(conn, :show, user_luke.username))
+    conn = get(conn, auth_path(conn, :show))
 
     assert json_response(conn, 200)["data"]["token_type"] == "bearer"
     assert json_response(conn, 200)["data"]["expires_in"] == 3600
@@ -49,15 +49,15 @@ defmodule StatazApi.AuthControllerTest do
   end
 
   test "does not show resource when unauthenticated", %{conn: conn} do
-    user_luke = TestCommon.create_user(Repo, @default_user.username, @default_user.password, @default_user.email)
-    conn = get(conn, auth_path(conn, :show, user_luke.username))
+    TestCommon.create_user(Repo, @default_user.username, @default_user.password, @default_user.email)
+    conn = get(conn, auth_path(conn, :show))
     assert json_response(conn, 401)["errors"]["title"] == "Authentication failed"
   end
 
   test "does not show resource when token expires", %{conn: conn} do
     user_luke = TestCommon.create_user(Repo, @default_user.username, @default_user.password, @default_user.email)
     conn = authenticate(conn, Repo, user_luke.id, 0)
-    conn = get(conn, auth_path(conn, :show, user_luke.username))
+    conn = get(conn, auth_path(conn, :show))
 
     assert json_response(conn, 401)["errors"]["title"] == "Authentication failed"
   end
@@ -65,15 +65,15 @@ defmodule StatazApi.AuthControllerTest do
   test "deletes the resource when authenticated", %{conn: conn} do
     user_luke = TestCommon.create_user(Repo, @default_user.username, @default_user.password, @default_user.email)
     conn = authenticate(conn, Repo, user_luke.id, 3600)
-    conn = delete(conn, auth_path(conn, :delete, user_luke.username))
+    conn = delete(conn, auth_path(conn, :delete))
 
     assert response(conn, 204)
     refute Repo.get_by(AccessToken, user_id: user_luke.id)
   end
 
   test "does not delete resource when unauthenticated", %{conn: conn} do
-    user_luke = TestCommon.create_user(Repo, @default_user.username, @default_user.password, @default_user.email)
-    conn = delete(conn, auth_path(conn, :delete, user_luke.username))
+    TestCommon.create_user(Repo, @default_user.username, @default_user.password, @default_user.email)
+    conn = delete(conn, auth_path(conn, :delete))
     assert json_response(conn, 401)["errors"]["title"] == "Authentication failed"
   end
 end

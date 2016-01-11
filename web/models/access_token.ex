@@ -13,9 +13,9 @@ defmodule StatazApi.AccessToken do
   @required_fields ~w(token expires)
   @optional_fields ~w(user_id)
 
-  def get_by_user_id_and_token(user_id, token) do
+  def get_by_token(token) do
     from t in StatazApi.AccessToken,
-    where: t.user_id == ^user_id and t.token_hash == ^hash(token)
+    where: t.token_hash == ^hash(token)
   end
 
   def delete_for_user_id_and_token(user_id, token) do

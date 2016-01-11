@@ -9,14 +9,14 @@ defmodule StatazApi.Router do
     plug StatazApi.Auth, repo: StatazApi.Repo
   end
 
-  scope "/users", StatazApi do
+  scope "/user", StatazApi do
     pipe_through :api
     post "/", UserController, :create
 
     pipe_through :auth
-    get "/:username", UserController, :show
-    delete "/:username", UserController, :delete
-    put "/:username", UserController, :update
+    get "/", UserController, :show
+    delete "/", UserController, :delete
+    put "/", UserController, :update
   end
 
   scope "/auth", StatazApi do
@@ -24,17 +24,17 @@ defmodule StatazApi.Router do
     post "/", AuthController, :create
 
     pipe_through :auth
-    get "/:username", AuthController, :show
-    delete "/:username", AuthController, :delete
+    get "/", AuthController, :show
+    delete "/", AuthController, :delete
   end
 
   scope "/status", StatazApi do
     pipe_through :api
     pipe_through :auth
 
-    get "/:username", StatusController, :list
-    post "/:username", StatusController, :create
-    delete "/:username/:id", StatusController, :delete
-    put "/:username/:id", StatusController, :update
+    get "/", StatusController, :list
+    post "/", StatusController, :create
+    delete "/:id", StatusController, :delete
+    put "/:id", StatusController, :update
   end
 end

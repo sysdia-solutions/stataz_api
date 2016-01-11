@@ -11,12 +11,10 @@ defmodule StatazApi.Auth do
   end
 
   def call(conn, repo) do
-    username = Map.get(conn.params, "username")
     access_token = get_req_header(conn, "authorization")
-
     expire_tokens(repo)
 
-    authenticate_user(repo, username, access_token)
+    authenticate_token(repo, access_token)
     |> call_response(conn)
   end
 
@@ -44,17 +42,13 @@ defmodule StatazApi.Auth do
   end
 
   def show_token(conn, repo) do
-    if conn.assigns[:current_user] do
-      access_token = get_req_header(conn, "authorization")
-      token = check_token(repo, conn.assigns.current_user.id, access_token)
+    access_token = get_req_header(conn, "authorization")
+    token = check_token(repo, access_token)
 
-      if token do
-        {:ok, token}
-      else
-        {:error, :unauthorized}
-      end
+    if token do
+      {:ok, token}
     else
-      {:error, :unprocessable_entity}
+      {:error, :unauthorized}
     end
   end
 
@@ -72,13 +66,11 @@ defmodule StatazApi.Auth do
     |> halt()
   end
 
-
   defp delete_user_token(conn, repo, user_id) do
     access_token = parse_token(get_req_header(conn, "authorization"))
     AccessToken.delete_for_user_id_and_token(user_id, access_token)
     |> repo.delete_all()
   end
-
 
   defp expire_tokens(repo) do
     Time.ecto_now()
@@ -86,23 +78,19 @@ defmodule StatazApi.Auth do
     |> repo.delete_all()
   end
 
-  defp authenticate_user(repo, username, access_token) do
-    user = repo.get_by(User, username: username)
-
-    cond do
-      user && check_token(repo, user.id, access_token) ->
-        {:ok, user}
-      user ->
-        {:error, :unauthorized}
-      true ->
-        {:error, :not_found}
+  defp authenticate_token(repo, access_token) do
+    if token = check_token(repo, access_token) do
+      user = repo.get(User, token.user_id)
+      {:ok, user}
+    else
+      {:error, :unauthorized}
     end
   end
 
-  defp check_token(repo, user_id, token) do
+  defp check_token(repo, token) do
     parsed_token = parse_token(token)
 
-    access_token = AccessToken.get_by_user_id_and_token(user_id, parsed_token)
+    access_token = AccessToken.get_by_token(parsed_token)
                    |> repo.one()
 
     if access_token do
@@ -128,13 +116,18 @@ defmodule StatazApi.Auth do
   end
 
   defp login(user, repo) do
-    AccessToken.changeset(%AccessToken{}, %{user_id: user.id, token: generate_token(), expires: generate_expiry()})
+    AccessToken.changeset(%AccessToken{}, %{user_id: user.id, token: generate_token(user), expires: generate_expiry()})
     |> repo.insert()
   end
 
-  defp generate_token() do
-    Ecto.UUID.generate
-    |> String.replace("-", "")
+  defp generate_token(user) do
+    token = Ecto.UUID.generate
+            |> String.replace("-", "")
+
+    salt = :crypto.hash(:md5, user.username)
+           |> Base.encode16
+
+    token <> salt
   end
 
   defp generate_expiry() do
