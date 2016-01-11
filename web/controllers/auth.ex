@@ -43,7 +43,7 @@ defmodule StatazApi.Auth do
 
   def purge_tokens(conn, repo) do
     if conn.assigns[:current_user] do
-      AccessToken.get_by_user_id(conn.assigns.current_user.id)
+      AccessToken.by_user_id(conn.assigns.current_user.id)
       |> repo.delete_all()
     end
   end
@@ -75,13 +75,13 @@ defmodule StatazApi.Auth do
 
   defp delete_user_token(conn, repo, user_id) do
     access_token = parse_token(get_req_header(conn, "authorization"))
-    AccessToken.get_by_user_id_and_token(user_id, access_token)
+    AccessToken.by_user_id_and_token(user_id, access_token)
     |> repo.delete_all()
   end
 
   defp expire_tokens(repo) do
     Time.ecto_now()
-    |> AccessToken.get_all_expired()
+    |> AccessToken.by_all_expired()
     |> repo.delete_all()
   end
 
@@ -97,7 +97,7 @@ defmodule StatazApi.Auth do
   defp check_token(repo, token) do
     parsed_token = parse_token(token)
 
-    access_token = AccessToken.get_by_token(parsed_token)
+    access_token = AccessToken.by_token(parsed_token)
                    |> repo.one()
 
     if access_token do

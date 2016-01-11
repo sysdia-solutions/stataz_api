@@ -13,22 +13,22 @@ defmodule StatazApi.AccessToken do
   @required_fields ~w(token expires)
   @optional_fields ~w(user_id)
 
-  def get_by_token(token) do
+  def by_token(token) do
     from t in StatazApi.AccessToken,
     where: t.token_hash == ^hash(token)
   end
 
-  def get_by_user_id(user_id) do
+  def by_user_id(user_id) do
     from t in StatazApi.AccessToken,
     where: t.user_id == ^user_id
   end
 
-  def get_by_user_id_and_token(user_id, token) do
+  def by_user_id_and_token(user_id, token) do
     from t in StatazApi.AccessToken,
     where: t.user_id == ^user_id and t.token_hash == ^hash(token)
   end
 
-  def get_all_expired(datetime) do
+  def by_all_expired(datetime) do
     from t in StatazApi.AccessToken,
     where: t.expires <= ^datetime
   end

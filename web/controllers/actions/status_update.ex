@@ -35,7 +35,7 @@ defmodule StatazApi.StatusController.ActionUpdate do
   defp update_previous_active_true_to_false(status, params) do
     if active_true?(params) do
       {:ok, elements} = status
-      Status.update_active_by_user_id_exclude_id(elements.user_id, elements.id)
+      Status.by_user_id_exclude_id(elements.user_id, elements.id)
       |> Repo.update_all(set: [active: false])
     end
     status

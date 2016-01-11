@@ -4,7 +4,7 @@ defmodule StatazApi.StatusController.ActionDelete do
 
   def execute(conn, %{"id" => id}) do
     status = Repo.get(Status, id)
-    Status.get_by_id_and_inactive(id)
+    Status.by_id_and_inactive(id)
     |> Repo.delete_all()
     |> response(conn, status)
   end

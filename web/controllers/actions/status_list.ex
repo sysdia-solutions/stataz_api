@@ -3,7 +3,7 @@ defmodule StatazApi.StatusController.ActionList do
   alias StatazApi.Status
 
   def execute(conn) do
-    Status.get_by_user_id(conn.assigns.current_user.id)
+    Status.by_user_id(conn.assigns.current_user.id)
     |> Repo.all()
     |> response(conn)
   end
