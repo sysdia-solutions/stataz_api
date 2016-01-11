@@ -105,5 +105,8 @@ msgstr "Resource can't be found"
 msgid "unauthorized"
 msgstr "Authentication failed"
 
+msgid "forbidden"
+msgstr "Forbidden"
+
 msgid "unprocessable_entity"
 msgstr "Semantic errors"

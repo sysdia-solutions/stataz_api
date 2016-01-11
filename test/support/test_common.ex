@@ -11,4 +11,9 @@ defmodule StatazApi.TestCommon do
     StatazApi.User.create_changeset(%StatazApi.User{}, %{username: username, password: password, email: email})
     |> repo.insert!()
   end
+
+  def create_status(repo, user_id, description, active) do
+    StatazApi.Status.changeset(%StatazApi.Status{}, %{user_id: user_id, description: description, active: active})
+    |> repo.insert!()
+  end
 end

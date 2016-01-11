@@ -102,5 +102,8 @@ msgstr ""
 msgid "unauthorized"
 msgstr ""
 
+msgid "forbidden"
+msgstr ""
+
 msgid "unprocessable_entity"
 msgstr ""
