@@ -2,8 +2,8 @@ defmodule StatazApi.UserController.ActionDelete do
   use StatazApi.Web, :controller
   alias StatazApi.User
 
-  def execute(conn, username) do
-    Repo.get_by(User, %{username: username})
+  def execute(conn) do
+    Repo.get(User, conn.assigns.current_user.id)
     |> delete(conn)
   end
 

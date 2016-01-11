@@ -28,7 +28,7 @@ defmodule StatazApi.StatusControllerTest do
     status_3 = TestCommon.create_status(Repo, user_luke.id, @status_3.description, @status_3.active)
 
     conn = authenticate(conn, Repo, user_luke.id, 3600)
-    conn = get(conn, status_path(conn, :list, user_luke.username))
+    conn = get(conn, status_path(conn, :list))
 
     expected = [
                  %{
@@ -54,7 +54,7 @@ defmodule StatazApi.StatusControllerTest do
   test "displays an empty list when no resources exist for authenticated user", %{conn: conn} do
     user_luke = TestCommon.create_user(Repo, @default_user.username, @default_user.password, @default_user.email)
     conn = authenticate(conn, Repo, user_luke.id, 3600)
-    conn = get(conn, status_path(conn, :list, user_luke.username))
+    conn = get(conn, status_path(conn, :list))
 
     assert json_response(conn, 200)["data"] == []
   end
@@ -63,14 +63,14 @@ defmodule StatazApi.StatusControllerTest do
     user_luke = TestCommon.create_user(Repo, @default_user.username, @default_user.password, @default_user.email)
     TestCommon.create_status(Repo, user_luke.id, "flying", false)
 
-    conn = get(conn, status_path(conn, :list, user_luke.username))
+    conn = get(conn, status_path(conn, :list))
     assert json_response(conn, 401)["errors"]["title"] == "Authentication failed"
   end
 
   test "creates and renders resource when data is valid", %{conn: conn} do
     user_luke = TestCommon.create_user(Repo, @default_user.username, @default_user.password, @default_user.email)
     conn = authenticate(conn, Repo, user_luke.id, 3600)
-    conn = post(conn, status_path(conn, :create, user_luke.username), @status_1)
+    conn = post(conn, status_path(conn, :create), @status_1)
 
     status_1 = Repo.get_by(Status, %{description: @status_1.description})
 
@@ -84,7 +84,7 @@ defmodule StatazApi.StatusControllerTest do
   test "creates resource and always set active to false", %{conn: conn} do
     user_luke = TestCommon.create_user(Repo, @default_user.username, @default_user.password, @default_user.email)
     conn = authenticate(conn, Repo, user_luke.id, 3600)
-    conn = post(conn, status_path(conn, :create, user_luke.username), @status_2)
+    conn = post(conn, status_path(conn, :create), @status_2)
 
     status_2 = Repo.get_by(Status, %{description: @status_2.description})
 
@@ -98,21 +98,21 @@ defmodule StatazApi.StatusControllerTest do
   test "does not create resource and renders errors when data is invald", %{conn: conn} do
     user_luke = TestCommon.create_user(Repo, @default_user.username, @default_user.password, @default_user.email)
     conn = authenticate(conn, Repo, user_luke.id, 3600)
-    conn = post(conn, status_path(conn, :create, user_luke.username), @invalid_attrs)
+    conn = post(conn, status_path(conn, :create), @invalid_attrs)
     assert json_response(conn, 422)["errors"] == %{"description" => ["can't be blank"]}
   end
 
   test "does not create resource and renders errors when description is too short", %{conn: conn} do
     user_luke = TestCommon.create_user(Repo, @default_user.username, @default_user.password, @default_user.email)
     conn = authenticate(conn, Repo, user_luke.id, 3600)
-    conn = post(conn, status_path(conn, :create, user_luke.username), %{description: "a"})
+    conn = post(conn, status_path(conn, :create), %{description: "a"})
     assert json_response(conn, 422)["errors"] == %{"description" => ["should be at least 2 character(s)"]}
   end
 
   test "does not create resource and renders errors when description is too long", %{conn: conn} do
     user_luke = TestCommon.create_user(Repo, @default_user.username, @default_user.password, @default_user.email)
     conn = authenticate(conn, Repo, user_luke.id, 3600)
-    conn = post(conn, status_path(conn, :create, user_luke.username), %{description: "having a battle in a galaxy, far far away"})
+    conn = post(conn, status_path(conn, :create), %{description: "having a battle in a galaxy, far far away"})
     assert json_response(conn, 422)["errors"] == %{"description" => ["should be at most 32 character(s)"]}
   end
 
@@ -121,7 +121,7 @@ defmodule StatazApi.StatusControllerTest do
     status_1 = TestCommon.create_status(Repo, user_luke.id, @status_1.description, @status_1.active)
 
     conn = authenticate(conn, Repo, user_luke.id, 3600)
-    conn = put(conn, status_path(conn, :update, user_luke.username, status_1.id), %{description: "dueling"})
+    conn = put(conn, status_path(conn, :update, status_1.id), %{description: "dueling"})
 
     assert json_response(conn, 200)["data"] == %{"id" => status_1.id,
                                                 "description" => "dueling",
@@ -134,7 +134,7 @@ defmodule StatazApi.StatusControllerTest do
     status_2 = TestCommon.create_status(Repo, user_luke.id, @status_2.description, @status_2.active)
 
     conn = authenticate(conn, Repo, user_luke.id, 3600)
-    conn = put(conn, status_path(conn, :update, user_luke.username, status_2.id), %{description: "spying"})
+    conn = put(conn, status_path(conn, :update, status_2.id), %{description: "spying"})
 
     assert json_response(conn, 200)["data"] == %{"id" => status_2.id,
                                                 "description" => "spying",
@@ -151,7 +151,7 @@ defmodule StatazApi.StatusControllerTest do
     assert status_2.active == true
 
     conn = authenticate(conn, Repo, user_luke.id, 3600)
-    conn = put(conn, status_path(conn, :update, user_luke.username, status_1.id), %{active: true})
+    conn = put(conn, status_path(conn, :update, status_1.id), %{active: true})
 
     status_2 = Repo.get(Status, status_2.id)
 
@@ -166,7 +166,7 @@ defmodule StatazApi.StatusControllerTest do
     user_luke = TestCommon.create_user(Repo, @default_user.username, @default_user.password, @default_user.email)
     status_2 = TestCommon.create_status(Repo, user_luke.id, @status_2.description, @status_2.active)
     conn = authenticate(conn, Repo, user_luke.id, 3600)
-    conn = put(conn, status_path(conn, :update, user_luke.username, status_2.id), %{active: false})
+    conn = put(conn, status_path(conn, :update, status_2.id), %{active: false})
 
     assert json_response(conn, 403)["errors"]["title"] == "Forbidden"
   end
@@ -176,7 +176,7 @@ defmodule StatazApi.StatusControllerTest do
     status_1 = TestCommon.create_status(Repo, user_luke.id, @status_1.description, @status_1.active)
 
     conn = authenticate(conn, Repo, user_luke.id, 3600)
-    conn = put(conn, status_path(conn, :update, user_luke.username, status_1.id), %{description: "a"})
+    conn = put(conn, status_path(conn, :update, status_1.id), %{description: "a"})
 
     assert json_response(conn, 422)["errors"] ==  %{"description" => ["should be at least 2 character(s)"]}
   end
@@ -185,14 +185,14 @@ defmodule StatazApi.StatusControllerTest do
     user_luke = TestCommon.create_user(Repo, @default_user.username, @default_user.password, @default_user.email)
     status_1 = TestCommon.create_status(Repo, user_luke.id, @status_1.description, @status_1.active)
 
-    conn = put(conn, status_path(conn, :update, user_luke.username, status_1.id), %{description: "dueling"})
+    conn = put(conn, status_path(conn, :update, status_1.id), %{description: "dueling"})
     assert json_response(conn, 401)["errors"]["title"] == "Authentication failed"
   end
 
   test "does not update resource when non-existent", %{conn: conn} do
     user_luke = TestCommon.create_user(Repo, @default_user.username, @default_user.password, @default_user.email)
     conn = authenticate(conn, Repo, user_luke.id, 3600)
-    conn = put(conn, status_path(conn, :update, user_luke.username, 1), %{description: "dueling"})
+    conn = put(conn, status_path(conn, :update, 1), %{description: "dueling"})
     assert json_response(conn, 404)["errors"]["title"] == "Resource can't be found"
   end
 
@@ -200,7 +200,7 @@ defmodule StatazApi.StatusControllerTest do
     user_luke = TestCommon.create_user(Repo, @default_user.username, @default_user.password, @default_user.email)
     status_1 = TestCommon.create_status(Repo, user_luke.id, @status_1.description, @status_1.active)
     conn = authenticate(conn, Repo, user_luke.id, 3600)
-    conn = delete(conn, status_path(conn, :delete, user_luke.username, status_1.id))
+    conn = delete(conn, status_path(conn, :delete, status_1.id))
 
     assert response(conn, 204)
     refute Repo.get(Status, status_1.id)
@@ -209,14 +209,14 @@ defmodule StatazApi.StatusControllerTest do
   test "does not delete resource when unauthenticated", %{conn: conn} do
     user_luke = TestCommon.create_user(Repo, @default_user.username, @default_user.password, @default_user.email)
     status_1 = TestCommon.create_status(Repo, user_luke.id, @status_1.description, @status_1.active)
-    conn = delete(conn, status_path(conn, :delete, user_luke.username, status_1.id))
+    conn = delete(conn, status_path(conn, :delete, status_1.id))
     assert json_response(conn, 401)["errors"]["title"] == "Authentication failed"
   end
 
   test "does not delete resource when non-existent", %{conn: conn} do
     user_luke = TestCommon.create_user(Repo, @default_user.username, @default_user.password, @default_user.email)
     conn = authenticate(conn, Repo, user_luke.id, 3600)
-    conn = delete(conn, status_path(conn, :delete, user_luke.username, 1))
+    conn = delete(conn, status_path(conn, :delete, 1))
     assert json_response(conn, 404)["errors"]["title"] == "Resource can't be found"
   end
 
@@ -224,7 +224,7 @@ defmodule StatazApi.StatusControllerTest do
     user_luke = TestCommon.create_user(Repo, @default_user.username, @default_user.password, @default_user.email)
     status_2 = TestCommon.create_status(Repo, user_luke.id, @status_2.description, @status_2.active)
     conn = authenticate(conn, Repo, user_luke.id, 3600)
-    conn = delete(conn, status_path(conn, :delete, user_luke.username, status_2.id))
+    conn = delete(conn, status_path(conn, :delete, status_2.id))
 
     assert json_response(conn, 403)["errors"]["title"] == "Forbidden"
   end

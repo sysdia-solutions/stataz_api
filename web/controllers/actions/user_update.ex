@@ -2,10 +2,9 @@ defmodule StatazApi.UserController.ActionUpdate do
   use StatazApi.Web, :controller
   alias StatazApi.User
 
-  def execute(conn, username) do
-    user_params = conn.body_params
-    Repo.get_by(User, %{username: username})
-    |> update(conn, user_params)
+  def execute(conn, params) do
+    Repo.get(User, conn.assigns.current_user.id)
+    |> update(conn, params)
   end
 
   defp update(user = %User{}, conn, user_params) do

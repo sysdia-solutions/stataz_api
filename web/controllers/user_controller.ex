@@ -10,15 +10,15 @@ defmodule StatazApi.UserController do
     ActionCreate.execute(conn, user_params)
   end
 
-  def show(conn, %{"username" => username}) do
-    ActionShow.execute(conn, username)
+  def show(conn, _params) do
+    ActionShow.execute(conn)
   end
 
-  def update(conn, %{"username" => username}) do
-    ActionUpdate.execute(conn, username)
+  def update(conn, params) do
+    ActionUpdate.execute(conn, params)
   end
 
-  def delete(conn, %{"username" => username}) do
-    ActionDelete.execute(conn, username)
+  def delete(conn, _params) do
+    ActionDelete.execute(conn)
   end
 end
