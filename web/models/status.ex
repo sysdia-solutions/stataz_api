@@ -22,9 +22,9 @@ defmodule StatazApi.Status do
     where: s.user_id == ^user_id
   end
 
-  def by_id_and_inactive(id) do
+  def by_id_and_active(id, active) do
     from s in StatazApi.Status,
-    where: s.id == ^id and s.active == false
+    where: s.id == ^id and s.active == ^active
   end
 
   def changeset(model, params \\ :empty) do
