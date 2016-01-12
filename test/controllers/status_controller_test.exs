@@ -129,6 +129,22 @@ defmodule StatazApi.StatusControllerTest do
                                                }
   end
 
+  test "update resource to active:true adds status to status history", %{conn: conn} do
+    user_luke = TestCommon.create_user(Repo, @default_user.username, @default_user.password, @default_user.email)
+    status_1 = TestCommon.create_status(Repo, user_luke.id, @status_1.description, @status_1.active)
+    status_3 = TestCommon.create_status(Repo, user_luke.id, @status_3.description, @status_3.active)
+
+    conn = authenticate(conn, Repo, user_luke.id, 3600)
+    put(conn, status_path(conn, :update, status_1.id), %{active: true})
+
+    assert Repo.get_by(StatazApi.History, %{description: @status_1.description})
+    refute Repo.get_by(StatazApi.History, %{description: @status_3.description})
+
+    put(conn, status_path(conn, :update, status_3.id), %{active: true})
+
+    assert Repo.get_by(StatazApi.History, %{description: @status_3.description})
+  end
+
   test "updates active:true resource description and renders resource when data is valid", %{conn: conn} do
     user_luke = TestCommon.create_user(Repo, @default_user.username, @default_user.password, @default_user.email)
     status_2 = TestCommon.create_status(Repo, user_luke.id, @status_2.description, @status_2.active)

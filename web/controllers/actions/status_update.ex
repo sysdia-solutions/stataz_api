@@ -1,6 +1,7 @@
 defmodule StatazApi.StatusController.ActionUpdate do
   use StatazApi.Web, :controller
   alias StatazApi.Status
+  alias StatazApi.History
 
   def execute(conn, params) do
     Repo.get(Status, params["id"])
@@ -55,6 +56,9 @@ defmodule StatazApi.StatusController.ActionUpdate do
   end
 
   defp response({:ok, status}, conn) do
+    if status.active do
+      add_history(conn.assigns.current_user.id, status.description)
+    end
     conn
     |> put_status(:ok)
     |> render("show.json", status: status)
@@ -64,5 +68,10 @@ defmodule StatazApi.StatusController.ActionUpdate do
     conn
     |> put_status(:unprocessable_entity)
     |> render(StatazApi.ChangesetView, "error.json", changeset: changeset)
+  end
+
+  defp add_history(user_id, description) do
+    History.changeset(%History{}, %{user_id: user_id, description: description})
+    |> Repo.insert()
   end
 end
