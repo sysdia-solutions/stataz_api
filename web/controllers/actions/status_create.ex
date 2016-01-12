@@ -3,9 +3,13 @@ defmodule StatazApi.StatusController.ActionCreate do
   alias StatazApi.Status
 
   def execute(conn, params) do
-    Status.changeset(%Status{}, %{user_id: conn.assigns.current_user.id, description: params["description"]})
-    |> Repo.insert()
+    build(conn.assigns.current_user.id, params["description"])
     |> response(conn)
+  end
+
+  def build(user_id, description) do
+    Status.changeset(%Status{}, %{user_id: user_id, description: description})
+    |> Repo.insert()
   end
 
   defp response({:ok, status}, conn) do

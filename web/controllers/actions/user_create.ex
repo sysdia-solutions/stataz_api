@@ -9,6 +9,7 @@ defmodule StatazApi.UserController.ActionCreate do
   end
 
   defp response({:ok, user}, conn) do
+    seed_default_status(user)
     conn
     |> put_status(:created)
     |> put_resp_header("location", user_path(conn, :show))
@@ -19,5 +20,11 @@ defmodule StatazApi.UserController.ActionCreate do
     conn
     |> put_status(:unprocessable_entity)
     |> render(StatazApi.ChangesetView, "error.json", changeset: changeset)
+  end
+
+  defp seed_default_status(user = %User{}) do
+    default_status = Gettext.dgettext(StatazApi.Gettext, "text", "new")
+    {:ok, status} = StatazApi.StatusController.ActionCreate.build(user.id, default_status)
+    StatazApi.StatusController.ActionUpdate.build(status, %{"active" => true}, user.id)
   end
 end

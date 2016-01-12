@@ -9,6 +9,13 @@ defmodule StatazApi.StatusController.ActionUpdate do
     |> update(conn, params)
   end
 
+  def build(status = %Status{}, params, user_id) do
+    Status.changeset(status, params)
+    |> Repo.update()
+    |> update_previous_active_true_to_false(params)
+    |> active_status_to_history(user_id)
+  end
+
   defp check_set_active_true_to_false(status = %Status{}, params) do
     if Map.has_key?(params, "active") and active_true_to_false?(%{"active" => status.active}, params) do
       {:error, :forbidden}
@@ -27,9 +34,7 @@ defmodule StatazApi.StatusController.ActionUpdate do
   end
 
   defp update(status = %Status{}, conn, params) do
-    Status.changeset(status, params)
-    |> Repo.update()
-    |> update_previous_active_true_to_false(params)
+    build(status, params, conn.assigns.current_user.id)
     |> response(conn)
   end
 
@@ -55,10 +60,18 @@ defmodule StatazApi.StatusController.ActionUpdate do
     active_true?(params_1) and !active_true?(params_2)
   end
 
-  defp response({:ok, status}, conn) do
+  defp active_status_to_history({:ok, status}, user_id) do
     if status.active do
-      add_history(conn.assigns.current_user.id, status.description)
+      add_history(user_id, status.description)
     end
+    {:ok, status}
+  end
+
+  defp active_status_to_history({:error, changeset}, _user_id) do
+    {:error, changeset}
+  end
+
+  defp response({:ok, status}, conn) do
     conn
     |> put_status(:ok)
     |> render("show.json", status: status)

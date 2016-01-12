@@ -42,7 +42,18 @@ defmodule StatazApi.UserControllerTest do
   test "creates and renders resource when data is valid", %{conn: conn} do
     create_attrs = %{username: "han.solo", password: "smuggler", email: "han@solo.com"}
     post(conn, user_path(conn, :create), create_attrs)
-    assert Repo.get_by(User, %{username: "han.solo"})
+    user_han = Repo.get_by(User, %{username: "han.solo"})
+
+    assert user_han
+
+    ## ensure default status is created and active
+    default_status = Repo.get_by(StatazApi.Status, %{user_id: user_han.id})
+
+    assert default_status.description == "New"
+    assert default_status.active == true
+
+    ## ensure the status history is created
+    assert Repo.get_by(StatazApi.History, %{description: "New"})
   end
 
   test "does not create resource and renders errors when data is invalid", %{conn: conn} do
