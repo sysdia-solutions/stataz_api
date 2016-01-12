@@ -2,7 +2,7 @@ defmodule StatazApi.ProfileView do
   use StatazApi.Web, :view
 
   def render("show.json", %{profile: profile}) do
-    %{data: render_one(List.first(profile), StatazApi.ProfileView, "profile.json")}
+    %{data: render_many(profile, StatazApi.ProfileView, "profile.json")}
   end
 
   def render("show.json", %{error: error}) do
@@ -14,6 +14,6 @@ defmodule StatazApi.ProfileView do
   def render("profile.json", %{profile: profile}) do
     %{username: profile.user.username,
       status: profile.description,
-      since: profile.updated_at}
+      since: StatazApi.Util.Time.ecto_datetime_simple_format(profile.inserted_at)}
   end
 end

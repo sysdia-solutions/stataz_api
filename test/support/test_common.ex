@@ -15,5 +15,17 @@ defmodule StatazApi.TestCommon do
   def create_status(repo, user_id, description, active) do
     StatazApi.Status.changeset(%StatazApi.Status{}, %{user_id: user_id, description: description, active: active})
     |> repo.insert!()
+    |> create_history(repo, user_id)
+  end
+
+  def create_history({:error, changeset}, _repo, _user_id) do
+  end
+
+  def create_history(status = %StatazApi.Status{}, repo, user_id) do
+    if status.active do
+      StatazApi.History.changeset(%StatazApi.History{}, %{user_id: user_id, description: status.description})
+      |> repo.insert!()
+    end
+    status
   end
 end

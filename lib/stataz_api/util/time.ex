@@ -23,4 +23,10 @@ defmodule StatazApi.Util.Time do
 
     Date.diff(date1, date2, unit)
   end
+
+  def ecto_datetime_simple_format(date) do
+    {:ok, string} = timex_from_ecto(date)
+                    |> DateFormat.format("%Y-%m-%d %H:%M:%S", :strftime)
+    string
+  end
 end
