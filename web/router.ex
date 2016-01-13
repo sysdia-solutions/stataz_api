@@ -30,18 +30,15 @@ defmodule StatazApi.Router do
 
   scope "/status", StatazApi do
     pipe_through :api
+
+    get "/:username", StatusController, :profile
+
     pipe_through :auth
 
     get "/", StatusController, :list
     post "/", StatusController, :create
     delete "/:id", StatusController, :delete
     put "/:id", StatusController, :update
-  end
-
-  scope "/profile", StatazApi do
-    pipe_through :api
-
-    get "/:username", ProfileController, :show
   end
 
   scope "/follow", StatazApi do

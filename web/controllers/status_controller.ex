@@ -5,6 +5,7 @@ defmodule StatazApi.StatusController do
   alias StatazApi.StatusController.ActionDelete
   alias StatazApi.StatusController.ActionUpdate
   alias StatazApi.StatusController.ActionList
+  alias StatazApi.StatusController.ActionProfile
 
   def create(conn, params) do
     ActionCreate.execute(conn, params)
@@ -20,5 +21,9 @@ defmodule StatazApi.StatusController do
 
   def list(conn, _params) do
     ActionList.execute(conn)
+  end
+
+  def profile(conn, params) do
+    ActionProfile.execute(conn, params)
   end
 end
