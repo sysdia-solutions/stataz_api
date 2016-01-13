@@ -27,6 +27,14 @@ defmodule StatazApi.Status do
     where: s.id == ^id and s.active == ^active
   end
 
+  def profile_by_user_id(user_id, limit) do
+    from h in StatazApi.History,
+    where: h.user_id == ^user_id,
+    order_by: [desc: h.inserted_at, desc: h.id],
+    limit: ^limit,
+    preload: [:user]
+  end
+
   def changeset(model, params \\ :empty) do
     model
     |> cast(params, @required_fields, @optional_fields)
