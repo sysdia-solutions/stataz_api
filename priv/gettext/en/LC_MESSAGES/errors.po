@@ -98,6 +98,14 @@ msgid_plural "must be equal to %{count}"
 msgstr[0] ""
 msgstr[1] ""
 
+## From validate_not_changed/2
+msgid "can't be changed"
+msgstr ""
+
+## From follow_self/1
+msgid "can't be the same"
+msgstr ""
+
 ## From HTTP Status Codes
 msgid "not_found"
 msgstr "Resource can't be found"
