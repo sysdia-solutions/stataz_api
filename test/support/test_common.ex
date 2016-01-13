@@ -18,7 +18,7 @@ defmodule StatazApi.TestCommon do
     |> create_history(repo, user_id)
   end
 
-  def create_history({:error, changeset}, _repo, _user_id) do
+  def create_history({:error, _changeset}, _repo, _user_id) do
   end
 
   def create_history(status = %StatazApi.Status{}, repo, user_id) do
@@ -27,5 +27,14 @@ defmodule StatazApi.TestCommon do
       |> repo.insert!()
     end
     status
+  end
+
+  def create_follow(follower_id, following_id, repo) do
+    StatazApi.Follow.changeset(%StatazApi.Follow{}, %{follower_id: follower_id, following_id: following_id})
+    |> repo.insert!()
+  end
+
+  def date_to_json(date) do
+    StatazApi.Util.Time.ecto_datetime_simple_format(date)
   end
 end

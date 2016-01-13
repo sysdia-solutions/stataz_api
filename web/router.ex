@@ -43,4 +43,16 @@ defmodule StatazApi.Router do
 
     get "/:username", ProfileController, :show
   end
+
+  scope "/follow", StatazApi do
+    pipe_through :api
+
+    get "/:username", FollowController, :public_show
+
+    pipe_through :auth
+
+    get "/", FollowController, :show
+    post "/:username", FollowController, :create
+    delete "/:username", FollowController, :delete
+  end
 end

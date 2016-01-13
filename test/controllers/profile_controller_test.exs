@@ -18,10 +18,6 @@ defmodule StatazApi.ProfileControllerTest do
     put_req_header(conn, "authorization", "Bearer #{token}")
   end
 
-  defp date_to_json(date) do
-    StatazApi.Util.Time.ecto_datetime_simple_format(date)
-  end
-
   defp get_response_field(conn, index, field) do
     {:ok, data} = conn.resp_body
                   |> Poison.decode()
@@ -39,7 +35,7 @@ defmodule StatazApi.ProfileControllerTest do
 
     assert json_response(conn, 200)["data"] == [%{"username" => @default_user.username,
                                                  "status" => @status_2.description,
-                                                 "since" => date_to_json(status_2.updated_at)}]
+                                                 "since" => TestCommon.date_to_json(status_2.updated_at)}]
   end
 
   test "show resource and render multiple statuses for each history", %{conn: conn} do
@@ -53,10 +49,10 @@ defmodule StatazApi.ProfileControllerTest do
     assert json_response(conn, 200)["data"] == [
                                                  %{"username" => @default_user.username,
                                                    "status" => @status_3.description,
-                                                   "since" => date_to_json(status_3.updated_at)},
+                                                   "since" => TestCommon.date_to_json(status_3.updated_at)},
                                                  %{"username" => @default_user.username,
                                                    "status" => @status_2.description,
-                                                   "since" => date_to_json(status_2.updated_at)}
+                                                   "since" => TestCommon.date_to_json(status_2.updated_at)}
                                                ]
 
   end
