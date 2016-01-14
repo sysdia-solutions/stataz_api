@@ -46,9 +46,9 @@ defmodule StatazApi.AuthTest do
     assert response == {:error, :unauthorized}
   end
 
-  test "login_with_username_and_password returns not_found error with unknown credentials" do
+  test "login_with_username_and_password returns unauthorized error with unknown user" do
     response = Auth.login_with_username_and_password(Repo, "darth.maul", "does-not-exist")
-    assert response == {:error, :not_found}
+    assert response == {:error, :unauthorized}
   end
 
   test "logout deletes the user access_token and clears the current_user", %{conn: conn} do

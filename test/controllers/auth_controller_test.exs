@@ -34,7 +34,7 @@ defmodule StatazApi.AuthControllerTest do
 
   test "does not create resource and returns error when resource not found", %{conn: conn} do
     conn = post(conn, auth_path(conn, :create), %{username: "darth.maul", password: "non-existent-sith"})
-    assert json_response(conn, 404)["errors"]["title"] == "Resource can't be found"
+    assert json_response(conn, 401)["errors"]["title"] == "Authentication failed"
   end
 
   test "does not create resource and returns error when credentials are invalid", %{conn: conn} do

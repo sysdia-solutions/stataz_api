@@ -27,7 +27,7 @@ defmodule StatazApi.Auth do
       user ->
         {:error, :unauthorized}
       true ->
-        {:error, :not_found}
+        {:error, :unauthorized}
     end
   end
 
