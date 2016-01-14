@@ -5,6 +5,7 @@ defmodule StatazApi.AuthControllerTest do
   alias StatazApi.AccessToken
 
   @default_user %{username: "luke.skywalker", password: "rebellion", email: "luke@skywalker.com"}
+  @invalid_attrs %{}
 
   setup %{conn: conn} do
     {:ok, conn: put_req_header(conn, "accept", "application/json")}
@@ -24,6 +25,11 @@ defmodule StatazApi.AuthControllerTest do
     assert json_response(conn, 201)["data"]["token_type"] == "bearer"
     assert json_response(conn, 201)["data"]["expires_in"] == 3600
     assert json_response(conn, 201)["data"]["access_token"] |> String.length == 64
+  end
+
+  test "does not create resource and returns error when invalid parameters", %{conn: conn} do
+    conn = post(conn, auth_path(conn, :create), @invalid_attrs)
+    assert json_response(conn, 401)["errors"]["title"] == "Authentication failed"
   end
 
   test "does not create resource and returns error when resource not found", %{conn: conn} do

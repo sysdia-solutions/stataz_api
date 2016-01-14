@@ -6,6 +6,11 @@ defmodule StatazApi.AuthController.ActionCreate do
     |> response(conn)
   end
 
+  def execute(conn, _params) do
+    {:error, :unauthorized}
+    |> response(conn)
+  end
+
   defp response({:ok, access_token}, conn) do
     conn
     |> put_status(:created)
