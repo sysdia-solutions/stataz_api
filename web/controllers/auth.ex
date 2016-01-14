@@ -5,6 +5,7 @@ defmodule StatazApi.Auth do
   alias StatazApi.Util.Time
   alias StatazApi.User
   alias StatazApi.AccessToken
+  alias StatazApi.RefreshToken
 
   def init(opts) do
     Keyword.fetch!(opts, :repo)
@@ -18,12 +19,12 @@ defmodule StatazApi.Auth do
     |> call_response(conn)
   end
 
-  def login_with_username_and_password(repo, username, password) do
+  def login_with_username_and_password(repo, username, password, client_id) do
     user = repo.get_by(User, username: username)
 
     cond do
       user && checkpw(password, user.password_hash) ->
-        login_response(user, repo)
+        login_response(user, repo, client_id)
       user ->
         {:error, :unauthorized}
       true ->
@@ -31,10 +32,25 @@ defmodule StatazApi.Auth do
     end
   end
 
-  def logout(conn, repo) do
+  def login_with_refresh_token(repo, refresh_token, client_id) do
+    token = RefreshToken.by_client_id_and_token(client_id, refresh_token)
+            |> repo.all()
+            |> List.first()
+
+    case token do
+      nil ->
+        {:error, :unauthorized}
+      _ ->
+        repo.get(User, token.user_id)
+        |> login_response(repo, client_id)
+    end
+  end
+
+  def logout(conn, repo, client_id \\ "") do
     if conn.assigns[:current_user] do
       {deleted, _} = delete_user_token(conn, repo, conn.assigns.current_user.id)
       if deleted > 0 do
+        delete_user_refresh_token(repo, conn.assigns.current_user.id, client_id)
         conn = assign(conn, :current_user, nil)
       end
     end
@@ -45,17 +61,8 @@ defmodule StatazApi.Auth do
     if conn.assigns[:current_user] do
       AccessToken.by_user_id(conn.assigns.current_user.id)
       |> repo.delete_all()
-    end
-  end
-
-  def show_token(conn, repo) do
-    access_token = get_req_header(conn, "authorization")
-    token = check_token(repo, access_token)
-
-    if token do
-      {:ok, token}
-    else
-      {:error, :unauthorized}
+      RefreshToken.by_user_id(conn.assigns.current_user.id)
+      |> repo.delete_all()
     end
   end
 
@@ -77,6 +84,13 @@ defmodule StatazApi.Auth do
     access_token = parse_token(get_req_header(conn, "authorization"))
     AccessToken.by_user_id_and_token(user_id, access_token)
     |> repo.delete_all()
+  end
+
+  defp delete_user_refresh_token(repo, user_id, client_id) do
+    if client_id != nil do
+      RefreshToken.by_client_id_and_user_id(client_id, user_id)
+      |> repo.delete_all()
+    end
   end
 
   defp expire_tokens(repo) do
@@ -115,16 +129,49 @@ defmodule StatazApi.Auth do
     ""
   end
 
-  defp login_response(user, repo) do
-    case login(user, repo) do
-      {:ok, access_token} -> {:ok, access_token}
-      {:error, _changeset} -> {:error, :unprocessable_entity}
-    end
+  defp login_response(user, repo, client_id) do
+    access_token = create_access_token(user, repo)
+    refresh_token = create_refresh_token(user, repo, client_id)
+
+    create_combined_token(access_token, refresh_token)
   end
 
-  defp login(user, repo) do
+  defp create_combined_token({:ok, access_token}, {:ok, refresh_token}) do
+    build_combined_token(access_token.token, access_token.expires, refresh_token.token)
+  end
+
+  defp create_combined_token({:ok, access_token}, nil) do
+    build_combined_token(access_token.token, access_token.expires, "")
+  end
+
+  defp create_combined_token(_bad_access_token, _bad_refresh_token) do
+    {:error, :unprocessable_entity}
+  end
+
+  defp build_combined_token(access_token, expires, refresh_token) do
+    combined_token = %{
+                       access_token: access_token,
+                       expires: expires,
+                       refresh_token: refresh_token
+                      }
+    {:ok, combined_token}
+  end
+
+  defp create_access_token(user, repo) do
     AccessToken.changeset(%AccessToken{}, %{user_id: user.id, token: generate_token(user), expires: generate_expiry()})
     |> repo.insert()
+  end
+
+  defp create_refresh_token(user, repo, client_id) do
+    params = %{user_id: user.id, client_id: client_id, token: generate_token(user)}
+    case RefreshToken.changeset(%RefreshToken{}, params) |> repo.insert do
+      {:ok, refresh_token} ->
+        RefreshToken.by_client_id_excluding_id(client_id, refresh_token.id)
+        |> repo.delete_all()
+        {:ok, refresh_token}
+      _ ->
+        nil
+    end
   end
 
   defp generate_token(user) do
@@ -134,7 +181,8 @@ defmodule StatazApi.Auth do
     salt = :crypto.hash(:md5, user.username)
            |> Base.encode16
 
-    token <> salt
+    :crypto.hash(:sha512, token <> salt)
+    |> Base.encode16
   end
 
   defp generate_expiry() do

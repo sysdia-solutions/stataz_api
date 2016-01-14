@@ -5,9 +5,10 @@ defmodule StatazApi.AuthView do
   def render("show.json", %{access_token: access_token}) do
     expires_in = Time.ecto_now()
                  |> Time.ecto_date_diff(access_token.expires, :secs)
-    data = %{ access_token: access_token.token,
+    data = %{ token_type: "bearer",
+              access_token: access_token.access_token,
               expires_in: expires_in,
-              token_type: "bearer" }
+              refresh_token: access_token.refresh_token }
     %{data: data}
   end
 

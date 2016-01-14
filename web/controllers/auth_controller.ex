@@ -3,17 +3,12 @@ defmodule StatazApi.AuthController do
 
   alias StatazApi.AuthController.ActionCreate
   alias StatazApi.AuthController.ActionDelete
-  alias StatazApi.AuthController.ActionShow
 
   def create(conn, login_params) do
     ActionCreate.execute(conn, login_params)
   end
 
-  def delete(conn, _params) do
-    ActionDelete.execute(conn)
-  end
-
-  def show(conn, _params) do
-    ActionShow.execute(conn)
+  def delete(conn, params) do
+    ActionDelete.execute(conn, params)
   end
 end

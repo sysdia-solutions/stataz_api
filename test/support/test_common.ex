@@ -7,6 +7,11 @@ defmodule StatazApi.TestCommon do
     |> repo.insert()
   end
 
+  def build_refresh_token(repo, user_id, token, client_id) do
+    StatazApi.RefreshToken.changeset(%StatazApi.RefreshToken{}, %{user_id: user_id, token: token, client_id: client_id})
+    |> repo.insert()
+  end
+
   def create_user(repo, username, password, email) do
     StatazApi.User.create_changeset(%StatazApi.User{}, %{username: username, password: password, email: email})
     |> repo.insert!()
