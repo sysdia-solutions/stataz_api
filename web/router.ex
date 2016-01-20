@@ -24,6 +24,7 @@ defmodule StatazApi.Router do
     post "/", AuthController, :create
 
     pipe_through :auth
+    get "/", AuthController, :show
     delete "/", AuthController, :delete
   end
 

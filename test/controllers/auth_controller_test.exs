@@ -149,4 +149,24 @@ defmodule StatazApi.AuthControllerTest do
     conn = delete(conn, auth_path(conn, :delete))
     assert json_response(conn, 401)["errors"]["title"] == "Authentication failed"
   end
+
+  test "shows the access_token when authenticated", %{conn: conn} do
+    user_luke = TestCommon.create_user(Repo, @default_user.username, @default_user.password, @default_user.email)
+    conn = authenticate(conn, Repo, user_luke.id, 3600)
+
+    conn = get(conn, auth_path(conn, :show))
+
+    assert json_response(conn, 200)["data"]["token_type"] == "bearer"
+    assert json_response(conn, 200)["data"]["expires_in"] >= 3590
+    assert json_response(conn, 200)["data"]["access_token"] == @default_token
+    refute json_response(conn, 200)["data"]["refresh_token"]
+  end
+
+  test "does not show the access_token when unauthenticated", %{conn: conn} do
+    TestCommon.create_user(Repo, @default_user.username, @default_user.password, @default_user.email)
+
+    conn = get(conn, auth_path(conn, :show))
+
+    assert json_response(conn, 401)["errors"]["title"] == "Authentication failed"
+  end
 end
