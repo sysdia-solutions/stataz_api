@@ -41,10 +41,12 @@ defmodule StatazApi.UserControllerTest do
 
   test "creates and renders resource when data is valid", %{conn: conn} do
     create_attrs = %{username: "han.solo", password: "smuggler", email: "han@solo.com"}
-    post(conn, user_path(conn, :create), create_attrs)
-    user_han = Repo.get_by(User, %{username: "han.solo"})
+    conn = post(conn, user_path(conn, :create), create_attrs)
 
+    user_han = Repo.get_by(User, %{username: "han.solo"})
     assert user_han
+
+    assert json_response(conn, 201)["data"] == %{"email" => "han@solo.com", "id" => user_han.id, "username" => "han.solo"}
 
     ## ensure default status is created and active
     default_status = Repo.get_by(StatazApi.Status, %{user_id: user_han.id})

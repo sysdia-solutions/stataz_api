@@ -66,6 +66,26 @@ defmodule StatazApi.Auth do
     end
   end
 
+  def get_token(conn, repo) do
+    if conn.assigns[:current_user] do
+      parsed_token = parse_token(get_req_header(conn, "authorization"))
+      access_token = AccessToken.by_user_id_and_token(conn.assigns.current_user.id, parsed_token)
+                     |> repo.one()
+      if access_token do
+        return_token = %{
+          access_token: parsed_token,
+          expires: access_token.expires,
+          refresh_token: nil
+        }
+        {:ok, return_token}
+      else
+        {:error, :unauthorized}
+      end
+    else
+      {:error, :unauthorized}
+    end
+  end
+
   defp call_response({:ok, user}, conn) do
     assign(conn, :current_user, user)
   end

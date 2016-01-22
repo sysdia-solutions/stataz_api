@@ -7,8 +7,11 @@ defmodule StatazApi.AuthView do
                  |> Time.ecto_date_diff(access_token.expires, :secs)
     data = %{ token_type: "bearer",
               access_token: access_token.access_token,
-              expires_in: expires_in,
-              refresh_token: access_token.refresh_token }
+              expires_in: expires_in}
+
+    if access_token.refresh_token do
+      data = Map.put(data, :refresh_token, access_token.refresh_token)
+    end
     %{data: data}
   end
 

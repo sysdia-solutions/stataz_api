@@ -155,4 +155,33 @@ defmodule StatazApi.AuthTest do
     assert Repo.get_by(StatazApi.AccessToken, user_id: user_luke.id)
     assert Repo.get_by(StatazApi.RefreshToken, user_id: user_luke.id)
   end
+
+  test "get_token retrieves current token data for given token and authorized user", %{conn: conn} do
+    user_luke = TestCommon.create_user(Repo, @default_user.username, @default_user.password, @default_user.email)
+    TestCommon.build_token(Repo, user_luke.id, @default_token, 3600)
+    conn = assign(conn, :current_user, user_luke)
+    conn = put_req_header(conn, "authorization", "Bearer #{@default_token}")
+
+    {:ok, response} = Auth.get_token(conn, Repo)
+    assert response.access_token == @default_token
+    refute response.refresh_token
+  end
+
+  test "get_token does not show current token data for given token and unauthorized user", %{conn: conn} do
+    user_luke = TestCommon.create_user(Repo, @default_user.username, @default_user.password, @default_user.email)
+    TestCommon.build_token(Repo, user_luke.id, @default_token, 3600)
+    conn = put_req_header(conn, "authorization", "Bearer #{@default_token}")
+
+    response = Auth.get_token(conn, Repo)
+    assert response == {:error, :unauthorized}
+  end
+
+  test "get_token does not show current token data for invalid token and authorized user", %{conn: conn} do
+    user_luke = TestCommon.create_user(Repo, @default_user.username, @default_user.password, @default_user.email)
+    conn = assign(conn, :current_user, user_luke)
+    conn = put_req_header(conn, "authorization", "Bearer #{@default_token}")
+
+    response = Auth.get_token(conn, Repo)
+    assert response == {:error, :unauthorized}
+  end
 end
