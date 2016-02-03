@@ -4,7 +4,7 @@ defmodule StatazApi.AuthTest do
   alias StatazApi.TestCommon
   alias StatazApi.Auth
 
-  @default_user %{username: "luke.skywalker", password: "rebellion", email: "luke@skywalker.com"}
+  @default_user %{username: "luke_skywalker", password: "rebellion", email: "luke@skywalker.com"}
   @default_token "tyidirium"
   @default_client_id "deathstar"
 

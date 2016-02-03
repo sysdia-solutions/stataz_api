@@ -27,6 +27,7 @@ defmodule StatazApi.User do
     |> cast(params, ~w(username), ~w(email))
     |> put_display_name()
     |> validate_length(:username, min: 3, max: 20)
+    |> validate_format(:username, ~r/^[a-zA-Z0-9_]+$/)
     |> validate_format(:email, ~r/@/)
     |> unique_constraint(:username)
     |> update_change(:email, &String.downcase/1)

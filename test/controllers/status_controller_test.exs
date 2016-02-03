@@ -4,7 +4,7 @@ defmodule StatazApi.StatusControllerTest do
   alias StatazApi.TestCommon
   alias StatazApi.Status
 
-  @default_user %{username: "luke.skywalker", password: "rebellion", email: "luke@skywalker.com"}
+  @default_user %{username: "luke_skywalker", password: "rebellion", email: "luke@skywalker.com"}
   @status_1 %{description: "fighting", active: false}
   @status_2 %{description: "battling", active: true}
   @status_3 %{description: "training", active: false}
