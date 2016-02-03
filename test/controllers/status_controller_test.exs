@@ -4,7 +4,7 @@ defmodule StatazApi.StatusControllerTest do
   alias StatazApi.TestCommon
   alias StatazApi.Status
 
-  @default_user %{username: "luke.skywalker", password: "rebellion", email: "luke@skywalker.com"}
+  @default_user %{username: "luke_skywalker", password: "rebellion", email: "luke@skywalker.com"}
   @status_1 %{description: "fighting", active: false}
   @status_2 %{description: "battling", active: true}
   @status_3 %{description: "training", active: false}
@@ -259,6 +259,20 @@ defmodule StatazApi.StatusControllerTest do
     TestCommon.create_status(Repo, user_luke.id, @status_3.description, @status_3.active)
 
     conn = get(conn, status_path(conn, :profile, user_luke.username))
+
+    assert json_response(conn, 200)["data"] == [%{"username" => @default_user.username,
+                                                 "status" => @status_2.description,
+                                                 "since" => TestCommon.date_to_json(status_2.updated_at)}]
+  end
+
+  test "show resource profile and render for valid user regardless of username case", %{conn: conn} do
+    user_luke = TestCommon.create_user(Repo, @default_user.username, @default_user.password, @default_user.email)
+
+    TestCommon.create_status(Repo, user_luke.id, @status_1.description, @status_1.active)
+    status_2 = TestCommon.create_status(Repo, user_luke.id, @status_2.description, @status_2.active)
+    TestCommon.create_status(Repo, user_luke.id, @status_3.description, @status_3.active)
+
+    conn = get(conn, status_path(conn, :profile, user_luke.username |> String.upcase()))
 
     assert json_response(conn, 200)["data"] == [%{"username" => @default_user.username,
                                                  "status" => @status_2.description,

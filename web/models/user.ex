@@ -3,11 +3,17 @@ defmodule StatazApi.User do
 
   schema "users" do
     field :username, :string
+    field :display_name, :string
     field :password, :string, virtual: true
     field :password_hash, :string
     field :email, :string
 
     timestamps
+  end
+
+  def by_username(username) do
+    from u in StatazApi.User,
+    where: u.username == ^String.downcase(username)
   end
 
   @doc """
@@ -19,9 +25,12 @@ defmodule StatazApi.User do
   def changeset(model, params \\ :empty) do
     model
     |> cast(params, ~w(username), ~w(email))
+    |> put_display_name()
     |> validate_length(:username, min: 3, max: 20)
+    |> validate_format(:username, ~r/^[a-zA-Z0-9_]+$/)
     |> validate_format(:email, ~r/@/)
     |> unique_constraint(:username)
+    |> update_change(:email, &String.downcase/1)
     |> unique_constraint(:email)
   end
 
@@ -29,6 +38,7 @@ defmodule StatazApi.User do
     model
     |> changeset(params)
     |> cast(params, ~w(password email), [])
+    |> update_change(:email, &String.downcase/1)
     |> validate_length(:password, min: 8, max: 100)
     |> put_password_hash()
   end
@@ -37,6 +47,7 @@ defmodule StatazApi.User do
     model
     |> changeset(params)
     |> cast(params, [], ~w(password email))
+    |> update_change(:email, &String.downcase/1)
     |> validate_not_changed(:username)
     |> validate_length(:password, min: 8, max: 100)
     |> put_password_hash()
@@ -46,6 +57,16 @@ defmodule StatazApi.User do
     case changeset do
       %Ecto.Changeset{valid?: true, changes: %{password: pass}} ->
         put_change(changeset, :password_hash, Comeonin.Bcrypt.hashpwsalt(pass))
+      _ ->
+        changeset
+    end
+  end
+
+  defp put_display_name(changeset) do
+    case changeset do
+      %Ecto.Changeset{valid?: true, changes: %{username: user}} ->
+        put_change(changeset, :display_name, user)
+        |> put_change(:username, String.downcase(user))
       _ ->
         changeset
     end

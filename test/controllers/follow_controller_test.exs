@@ -4,11 +4,11 @@ defmodule StatazApi.FollowControllerTest do
   alias StatazApi.TestCommon
   alias StatazApi.Follow
 
-  @user_luke %{username: "luke.skywalker", password: "rebellion", email: "luke@skywalker.com", status: "dueling"}
-  @user_han %{username: "han.solo", password: "scoundrel", email: "han@solo.com", status: "smuggling"}
-  @user_leia %{username: "leia.organa", password: "princess", email: "leia@organa.com", status: "debating"}
-  @user_r2d2 %{username: "r2.d2", password: "astrodroid", email: "r2@d2.com", status: "hacking"}
-  @user_c3po %{username: "c.3po", password: "protocoldroid", email: "c@3po.com", status: "interpreting"}
+  @user_luke %{username: "luke_skywalker", password: "rebellion", email: "luke@skywalker.com", status: "dueling"}
+  @user_han %{username: "han_solo", password: "scoundrel", email: "han@solo.com", status: "smuggling"}
+  @user_leia %{username: "leia_organa", password: "princess", email: "leia@organa.com", status: "debating"}
+  @user_r2d2 %{username: "r2_d2", password: "astrodroid", email: "r2@d2.com", status: "hacking"}
+  @user_c3po %{username: "c_3po", password: "protocoldroid", email: "c@3po.com", status: "interpreting"}
 
   setup %{conn: conn} do
     {:ok, conn: put_req_header(conn, "accept", "application/json")}

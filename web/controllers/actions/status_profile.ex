@@ -4,7 +4,8 @@ defmodule StatazApi.StatusController.ActionProfile do
   alias StatazApi.Status
 
   def execute(conn, %{"username" => username}) do
-    Repo.get_by(User, %{username: username})
+    User.by_username(username)
+    |> Repo.one()
     |> response(conn)
   end
 
