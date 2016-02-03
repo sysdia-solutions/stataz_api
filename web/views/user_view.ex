@@ -13,7 +13,7 @@ defmodule StatazApi.UserView do
 
   def render("user.json", %{user: user}) do
     %{id: user.id,
-      username: user.username,
+      username: user.display_name,
       email: user.email}
   end
 end

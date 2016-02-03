@@ -4,7 +4,11 @@ defmodule StatazApi.UserControllerTest do
   alias StatazApi.TestCommon
   alias StatazApi.User
 
-  @default_user %User{username: "luke.skywalker", password: "rebellion", password_hash: "rebellion", email: "luke@skywalker.com"}
+  @default_user %User{username: "luke.skywalker",
+                      display_name: "Luke.Skywalker",
+                      password: "rebellion",
+                      password_hash: "rebellion",
+                      email: "luke@skywalker.com"}
   @invalid_attrs %{}
 
   setup %{conn: conn} do
@@ -22,7 +26,7 @@ defmodule StatazApi.UserControllerTest do
     conn = authenticate(conn, Repo, user_luke.id, 3600)
     conn = get(conn, user_path(conn, :show))
     assert json_response(conn, 200)["data"] == %{"id" => user_luke.id,
-                                                 "username" => user_luke.username,
+                                                 "username" => user_luke.display_name,
                                                  "email" => user_luke.email}
   end
 
@@ -40,13 +44,13 @@ defmodule StatazApi.UserControllerTest do
   end
 
   test "creates and renders resource when data is valid", %{conn: conn} do
-    create_attrs = %{username: "han.solo", password: "smuggler", email: "han@solo.com"}
+    create_attrs = %{username: "Han.Solo", password: "smuggler", email: "han@solo.com"}
     conn = post(conn, user_path(conn, :create), create_attrs)
 
     user_han = Repo.get_by(User, %{username: "han.solo"})
     assert user_han
 
-    assert json_response(conn, 201)["data"] == %{"email" => "han@solo.com", "id" => user_han.id, "username" => "han.solo"}
+    assert json_response(conn, 201)["data"] == %{"email" => "han@solo.com", "id" => user_han.id, "username" => "Han.Solo"}
 
     ## ensure default status is created and active
     default_status = Repo.get_by(StatazApi.Status, %{user_id: user_han.id})
@@ -93,6 +97,14 @@ defmodule StatazApi.UserControllerTest do
     Repo.insert!(@default_user)
 
     create_attrs = %{username: "luke.skywalker", password: "smuggler", email: "han@solo.com"}
+    conn = post(conn, user_path(conn, :create), create_attrs)
+    assert json_response(conn, 422)["errors"] == %{"username" => ["has already been taken"]}
+  end
+
+  test "does not create resource and renders errors when username is not unique due to different letter case", %{conn: conn} do
+    Repo.insert!(@default_user)
+
+    create_attrs = %{username: "LUKE.SKYWALKER", password: "smuggler", email: "han@solo.com"}
     conn = post(conn, user_path(conn, :create), create_attrs)
     assert json_response(conn, 422)["errors"] == %{"username" => ["has already been taken"]}
   end
@@ -191,7 +203,7 @@ defmodule StatazApi.UserControllerTest do
 
   test "does not update chosen resource and renders errors when email is not unique", %{conn: conn} do
     Repo.insert!(@default_user)
-    user_han = Repo.insert! %User{username: "han.solo", password_hash: "smuggler", email: "han@solo.com"}
+    user_han = Repo.insert! %User{username: "han.solo", display_name: "Han.Solo", password_hash: "smuggler", email: "han@solo.com"}
 
     update_attrs = %{password: "smuggler", email: "luke@skywalker.com"}
     conn = authenticate(conn, Repo, user_han.id, 3600)

@@ -41,6 +41,14 @@ defmodule StatazApi.AuthTest do
     assert response.refresh_token |> String.length() == 128
   end
 
+  test "login_with_username_and_password username is case insensitive and still succeeds" do
+    TestCommon.create_user(Repo, @default_user.username, @default_user.password, @default_user.email)
+    {:ok, response} = Auth.login_with_username_and_password(Repo, @default_user.username |> String.upcase(), @default_user.password, @default_client_id)
+
+    assert response.access_token |> String.length() == 128
+    assert response.refresh_token |> String.length() == 128
+  end
+
   test "login_with_username_and_password without client_id creates an access_token and returns it" do
     TestCommon.create_user(Repo, @default_user.username, @default_user.password, @default_user.email)
     {:ok, response} = Auth.login_with_username_and_password(Repo, @default_user.username, @default_user.password, "")

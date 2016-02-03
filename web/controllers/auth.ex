@@ -20,7 +20,8 @@ defmodule StatazApi.Auth do
   end
 
   def login_with_username_and_password(repo, username, password, client_id) do
-    user = repo.get_by(User, username: username)
+    user = User.by_username(username)
+           |> repo.one()
 
     cond do
       user && checkpw(password, user.password_hash) ->
