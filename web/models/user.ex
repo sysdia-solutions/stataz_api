@@ -29,6 +29,7 @@ defmodule StatazApi.User do
     |> validate_length(:username, min: 3, max: 20)
     |> validate_format(:email, ~r/@/)
     |> unique_constraint(:username)
+    |> update_change(:email, &String.downcase/1)
     |> unique_constraint(:email)
   end
 
@@ -36,6 +37,7 @@ defmodule StatazApi.User do
     model
     |> changeset(params)
     |> cast(params, ~w(password email), [])
+    |> update_change(:email, &String.downcase/1)
     |> validate_length(:password, min: 8, max: 100)
     |> put_password_hash()
   end
@@ -44,6 +46,7 @@ defmodule StatazApi.User do
     model
     |> changeset(params)
     |> cast(params, [], ~w(password email))
+    |> update_change(:email, &String.downcase/1)
     |> validate_not_changed(:username)
     |> validate_length(:password, min: 8, max: 100)
     |> put_password_hash()

@@ -93,6 +93,14 @@ defmodule StatazApi.UserControllerTest do
     assert json_response(conn, 422)["errors"] == %{"email" => ["has already been taken"]}
   end
 
+  test "does not create resource and renders errors when email is not unique due to different letter case", %{conn: conn} do
+    Repo.insert!(@default_user)
+
+    create_attrs = %{username: "han.solo", password: "smuggler", email: "LUKE@SKYWALKER.COM"}
+    conn = post(conn, user_path(conn, :create), create_attrs)
+    assert json_response(conn, 422)["errors"] == %{"email" => ["has already been taken"]}
+  end
+
   test "does not create resource and renders errors when username is not unique", %{conn: conn} do
     Repo.insert!(@default_user)
 
@@ -206,6 +214,17 @@ defmodule StatazApi.UserControllerTest do
     user_han = Repo.insert! %User{username: "han.solo", display_name: "Han.Solo", password_hash: "smuggler", email: "han@solo.com"}
 
     update_attrs = %{password: "smuggler", email: "luke@skywalker.com"}
+    conn = authenticate(conn, Repo, user_han.id, 3600)
+    conn = put(conn, user_path(conn, :update), update_attrs)
+
+    assert json_response(conn, 422)["errors"] == %{"email" => ["has already been taken"]}
+  end
+
+  test "does not update chosen resource and renders errors when email is not unique due to different letter case", %{conn: conn} do
+    Repo.insert!(@default_user)
+    user_han = Repo.insert! %User{username: "han.solo", display_name: "Han.Solo", password_hash: "smuggler", email: "han@solo.com"}
+
+    update_attrs = %{password: "smuggler", email: "LUKE@SKYWALKER.COM"}
     conn = authenticate(conn, Repo, user_han.id, 3600)
     conn = put(conn, user_path(conn, :update), update_attrs)
 
