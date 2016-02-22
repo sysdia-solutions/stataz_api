@@ -52,4 +52,11 @@ defmodule StatazApi.Router do
     post "/:username", FollowController, :create
     delete "/:username", FollowController, :delete
   end
+
+  scope "/search", StatazApi do
+    pipe_through :api
+
+    get "/user/:query", SearchController, :list_user
+    get "/status/:query", SearchController, :list_status
+  end
 end
