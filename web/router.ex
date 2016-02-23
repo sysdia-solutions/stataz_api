@@ -59,4 +59,12 @@ defmodule StatazApi.Router do
     get "/user/:query", SearchController, :list_user
     get "/status/:query", SearchController, :list_status
   end
+
+  scope "/list", StatazApi do
+    pipe_through :api
+
+    get "/new/users", ListController, :new_users
+    get "/new/statuses", ListController, :new_statuses
+    get "/popular/statuses", ListController, :popular_statuses
+  end
 end

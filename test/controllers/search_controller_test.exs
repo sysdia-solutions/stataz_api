@@ -15,7 +15,7 @@ defmodule StatazApi.SearchControllerTest do
   test "lists all status results when queried by status name", %{conn: conn} do
     user_luke = TestCommon.create_user(Repo, @default_user.username, @default_user.password, @default_user.email)
     user_han = TestCommon.create_user(Repo, "han_solo", "smuggler", "han@solo.com")
-    user_leia = TestCommon.create_user(Repo, "leia_organa", "princess", "pricess@leia.com")
+    user_leia = TestCommon.create_user(Repo, "leia_organa", "princess", "princess@leia.com")
     user_vader = TestCommon.create_user(Repo, "darth_vader", "darksith", "darth@vader.com")
 
     TestCommon.create_status(Repo, user_luke.id, @status_1.description, @status_1.active)
@@ -59,7 +59,7 @@ defmodule StatazApi.SearchControllerTest do
   test "list all status results when queried by username or email", %{conn: conn} do
     user_luke = TestCommon.create_user(Repo, @default_user.username, @default_user.password, @default_user.email)
     user_han = TestCommon.create_user(Repo, "han_solo", "smuggler", "han@solo.com")
-    user_leia = TestCommon.create_user(Repo, "leia_organa", "princess", "pricess@leia.com")
+    user_leia = TestCommon.create_user(Repo, "leia_organa", "princess", "princess@leia.com")
     user_vader = TestCommon.create_user(Repo, "darth_vader", "darksith", "darth@vader.com")
     user_anakin = TestCommon.create_user(Repo, "anakin_skywalker", "chosenone", "anakin@skywalker.com")
 
@@ -102,7 +102,7 @@ defmodule StatazApi.SearchControllerTest do
   test "lists subset of status results when queried by status name given limit/offset", %{conn: conn} do
     user_luke = TestCommon.create_user(Repo, @default_user.username, @default_user.password, @default_user.email)
     user_han = TestCommon.create_user(Repo, "han_solo", "smuggler", "han@solo.com")
-    user_leia = TestCommon.create_user(Repo, "leia_organa", "princess", "pricess@leia.com")
+    user_leia = TestCommon.create_user(Repo, "leia_organa", "princess", "princess@leia.com")
     user_vader = TestCommon.create_user(Repo, "darth_vader", "darksith", "darth@vader.com")
 
     TestCommon.create_status(Repo, user_luke.id, @status_1.description, @status_1.active)
@@ -136,7 +136,7 @@ defmodule StatazApi.SearchControllerTest do
   test "list subset of status results when queried by username or email with given limit/offset", %{conn: conn} do
     user_luke = TestCommon.create_user(Repo, @default_user.username, @default_user.password, @default_user.email)
     user_han = TestCommon.create_user(Repo, "han_solo", "smuggler", "han@solo.com")
-    user_leia = TestCommon.create_user(Repo, "leia_organa", "princess", "pricess@leia.com")
+    user_leia = TestCommon.create_user(Repo, "leia_organa", "princess", "princess@leia.com")
     user_vader = TestCommon.create_user(Repo, "darth_vader", "darksith", "darth@vader.com")
     user_anakin = TestCommon.create_user(Repo, "anakin_skywalker", "chosenone", "anakin@skywalker.com")
 

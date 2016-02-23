@@ -12,8 +12,13 @@ defmodule StatazApi.TestCommon do
     |> repo.insert()
   end
 
-  def create_user(repo, username, password, email) do
-    StatazApi.User.create_changeset(%StatazApi.User{}, %{username: username, password: password, email: email})
+  def create_user(repo, username, password, email, inserted_at_shift \\ 0) do
+    inserted_at = StatazApi.Util.Time.ecto_now()
+                  |> StatazApi.Util.Time.ecto_shift(secs: inserted_at_shift)
+    StatazApi.User.create_changeset(%StatazApi.User{},
+                                    %{username: username, password: password, email: email,
+                                      inserted_at: inserted_at, updated_at: inserted_at},
+                                   ~w(inserted_at updated_at))
     |> repo.insert!()
   end
 

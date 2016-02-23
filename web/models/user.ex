@@ -34,10 +34,10 @@ defmodule StatazApi.User do
     |> unique_constraint(:email)
   end
 
-  def create_changeset(model, params) do
+  def create_changeset(model, params, optional_fields \\ []) do
     model
     |> changeset(params)
-    |> cast(params, ~w(password email), [])
+    |> cast(params, ~w(password email), optional_fields)
     |> update_change(:email, &String.downcase/1)
     |> validate_length(:password, min: 8, max: 100)
     |> put_password_hash()

@@ -13,6 +13,10 @@ defmodule StatazApi.StatusView do
     %{data: render_many(profile, StatazApi.StatusView, "profile.json")}
   end
 
+  def render("show.json", %{count: statuses}) do
+    %{data: render_many(statuses, StatazApi.StatusView, "count.json")}
+  end
+
   def render("show.json", %{error: error}) do
     %{errors:
       %{ title: StatazApi.ErrorHelpers.translate_error(to_string(error)) }
@@ -29,5 +33,10 @@ defmodule StatazApi.StatusView do
     %{username: profile.user.username,
       status: profile.description,
       since: StatazApi.Util.Time.ecto_datetime_simple_format(profile.inserted_at)}
+  end
+
+  def render("count.json", %{status: item}) do
+    {description, count} = item
+    %{status: description, count: count}
   end
 end

@@ -13,7 +13,7 @@ defmodule StatazApi.History do
 
   def list_by(type, model, query, limit \\ 10, offset \\ 0)
 
-  def list_by(:default, :status, query, limit, offset) do
+  def list_by(:search, :status, query, limit, offset) do
     from h in StatazApi.History,
     where: ilike(h.description, ^("%#{query}%")),
     order_by: [desc: h.inserted_at, desc: h.id],
@@ -22,10 +22,27 @@ defmodule StatazApi.History do
     preload: [:user]
   end
 
-  def list_by(:default, :user, query, limit, offset) do
+  def list_by(:search, :user, query, limit, offset) do
     from h in StatazApi.History,
     join: u in StatazApi.User, on: u.id == h.user_id,
     where: ilike(u.username, ^("%#{query}%")) or ilike(u.email, ^("%#{query}%")),
+    order_by: [desc: h.inserted_at, desc: h.id],
+    limit: ^limit,
+    offset: ^offset,
+    preload: [:user]
+  end
+
+  def list_by(:new, :user, _query, limit, offset) do
+    from h in StatazApi.History,
+    join: u in StatazApi.User, on: u.id == h.user_id,
+    order_by: [desc: u.inserted_at, desc: h.inserted_at, desc: h.id],
+    limit: ^limit,
+    offset: ^offset,
+    preload: [:user]
+  end
+
+  def list_by(:new, :status, _query, limit, offset) do
+    from h in StatazApi.History,
     order_by: [desc: h.inserted_at, desc: h.id],
     limit: ^limit,
     offset: ^offset,

@@ -35,6 +35,15 @@ defmodule StatazApi.Status do
     preload: [:user]
   end
 
+  def list_by_count(limit \\ 10, offset \\ 0) do
+    from s in StatazApi.Status,
+    where: s.active == true,
+    group_by: s.description,
+    limit: ^limit,
+    offset: ^offset,
+    select: {s.description, count(s.id)}
+  end
+
   def changeset(model, params \\ :empty) do
     model
     |> cast(params, @required_fields, @optional_fields)
