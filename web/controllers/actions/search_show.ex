@@ -5,11 +5,11 @@ defmodule StatazApi.SearchController.ActionShow do
     if data, do: data, else: default
   end
 
-  def execute(conn, params, type) do
+  def execute(conn, params, model) do
     limit = get_value(params["limit"], 10)
     offset = get_value(params["offset"], 0)
 
-    StatazApi.Status.list_by(type, params["query"], limit, offset)
+    StatazApi.History.list_by(:default, model, params["query"], limit, offset)
     |> Repo.all()
     |> response(conn)
   end
