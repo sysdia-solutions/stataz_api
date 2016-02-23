@@ -1,7 +1,7 @@
 defmodule StatazApi.StatusController.ActionProfile do
   use StatazApi.Web, :controller
   alias StatazApi.User
-  alias StatazApi.Status
+  alias StatazApi.History
 
   def execute(conn, %{"username" => username}) do
     User.by_username(username)
@@ -10,7 +10,7 @@ defmodule StatazApi.StatusController.ActionProfile do
   end
 
   defp response(user = %User{}, conn) do
-    profile = Status.profile_by_user_id(user.id, 5)
+    profile = History.profile_by_user_id(user.id, 5)
               |> Repo.all()
     render(conn, "show.json", profile: profile)
   end

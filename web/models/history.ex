@@ -11,6 +11,14 @@ defmodule StatazApi.History do
   @required_fields ~w(description)
   @optional_fields ~w(user_id)
 
+  def profile_by_user_id(user_id, limit) do
+    from h in StatazApi.History,
+    where: h.user_id == ^user_id,
+    order_by: [desc: h.inserted_at, desc: h.id],
+    limit: ^limit,
+    preload: [:user]
+  end
+
   def list_by(type, model, query, limit \\ 10, offset \\ 0)
 
   def list_by(:search, :status, query, limit, offset) do
