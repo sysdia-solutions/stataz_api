@@ -29,6 +29,29 @@ defmodule StatazApi.Status do
 
   def list_by(type, model, query, limit \\ 10, offset \\ 0)
 
+  def list_by(:search, :status, query, limit, offset) do
+    from s in StatazApi.Status,
+    where: s.active == true and ilike(s.description, ^("%#{query}%")),
+    order_by: [desc: s.updated_at, desc: s.id],
+    limit: ^limit,
+    offset: ^offset,
+    preload: [:user]
+  end
+
+  def list_by(:search, :user, query, limit, offset) do
+    from s in StatazApi.Status,
+    join: u in StatazApi.User, on: u.id == s.user_id,
+    where: s.active == true and
+           (
+             ilike(u.username, ^("%#{query}%")) or
+             ilike(u.email, ^("%#{query}%"))
+           ),
+    order_by: [asc: u.username],
+    limit: ^limit,
+    offset: ^offset,
+    preload: [:user]
+  end
+
   def list_by(:new, :user, _query, limit, offset) do
     from s in StatazApi.Status,
     join: u in StatazApi.User, on: u.id == s.user_id,

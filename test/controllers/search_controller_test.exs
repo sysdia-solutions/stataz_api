@@ -18,6 +18,10 @@ defmodule StatazApi.SearchControllerTest do
     user_leia = TestCommon.create_user(Repo, "leia_organa", "princess", "princess@leia.com")
     user_vader = TestCommon.create_user(Repo, "darth_vader", "darksith", "darth@vader.com")
 
+    # Previously active statuses should not cause user duplicates
+    TestCommon.create_status(Repo, user_luke.id, @status_1.description, @status_1.active, true)
+    TestCommon.create_status(Repo, user_luke.id, @status_3.description, @status_3.active, true)
+
     TestCommon.create_status(Repo, user_luke.id, @status_1.description, @status_1.active)
     TestCommon.create_status(Repo, user_luke.id, @status_3.description, @status_3.active)
     TestCommon.create_status(Repo, user_han.id, @status_1.description, @status_1.active)
@@ -68,6 +72,10 @@ defmodule StatazApi.SearchControllerTest do
 
     user_shmi = TestCommon.create_user(Repo, "shmi_lars", "slavemother", "shmi@skywalker.com")
 
+    # Previously active statuses should not cause user duplicates
+    TestCommon.create_status(Repo, user_luke.id, @status_1.description, @status_1.active, true)
+    TestCommon.create_status(Repo, user_luke.id, @status_3.description, @status_3.active, true)
+
     TestCommon.create_status(Repo, user_han.id, @status_2.description, @status_2.active)
     TestCommon.create_status(Repo, user_leia.id, @status_2.description, @status_2.active)
     TestCommon.create_status(Repo, user_vader.id, @status_2.description, @status_2.active)
@@ -80,11 +88,6 @@ defmodule StatazApi.SearchControllerTest do
 
     expected = [
                  %{
-                   "since" => TestCommon.date_to_json(shmi_active_status.updated_at),
-                   "status" => @status_2.description,
-                   "username" => user_shmi.username
-                 },
-                 %{
                    "since" => TestCommon.date_to_json(anakin_active_status.updated_at),
                    "status" => @status_2.description,
                    "username" => user_anakin.username
@@ -93,6 +96,11 @@ defmodule StatazApi.SearchControllerTest do
                    "since" => TestCommon.date_to_json(luke_active_status.updated_at),
                    "status" => @status_2.description,
                    "username" => user_luke.username
+                 },
+                 %{
+                   "since" => TestCommon.date_to_json(shmi_active_status.updated_at),
+                   "status" => @status_2.description,
+                   "username" => user_shmi.username
                  }
                ]
 
@@ -149,22 +157,24 @@ defmodule StatazApi.SearchControllerTest do
     TestCommon.create_status(Repo, user_leia.id, @status_2.description, @status_2.active)
     TestCommon.create_status(Repo, user_vader.id, @status_2.description, @status_2.active)
 
+    TestCommon.create_status(Repo, user_anakin.id, @status_2.description, @status_2.active)
     luke_active_status = TestCommon.create_status(Repo, user_luke.id, @status_2.description, @status_2.active)
-    anakin_active_status = TestCommon.create_status(Repo, user_anakin.id, @status_2.description, @status_2.active)
-    TestCommon.create_status(Repo, user_shmi.id, @status_2.description, @status_2.active)
+    shmi_active_status = TestCommon.create_status(Repo, user_shmi.id, @status_2.description, @status_2.active)
 
     conn = get(conn, search_path(conn, :list_user, "skywalker", limit: 2, offset: 1))
 
+    # User search results are ordered by username
+
     expected = [
-                 %{
-                   "since" => TestCommon.date_to_json(anakin_active_status.updated_at),
-                   "status" => @status_2.description,
-                   "username" => user_anakin.username
-                 },
                  %{
                    "since" => TestCommon.date_to_json(luke_active_status.updated_at),
                    "status" => @status_2.description,
                    "username" => user_luke.username
+                 },
+                 %{
+                   "since" => TestCommon.date_to_json(shmi_active_status.updated_at),
+                   "status" => @status_2.description,
+                   "username" => user_shmi.username
                  }
                ]
 

@@ -4,7 +4,7 @@ defmodule StatazApi.SearchController.ActionShow do
   def execute(conn, params, model) do
     {limit, offset} = StatazApi.Util.Params.get_limit_offset(params)
 
-    StatazApi.History.list_by(:search, model, params["query"], limit, offset)
+    StatazApi.Status.list_by(:search, model, params["query"], limit, offset)
     |> Repo.all()
     |> response(conn)
   end
