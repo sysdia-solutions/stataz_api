@@ -1,20 +1,12 @@
 defmodule StatazApi.ListController.ActionShow do
   use StatazApi.Web, :controller
 
-  def execute(conn, params, :popular, :status) do
-    {limit, offset} = StatazApi.Util.Params.get_limit_offset(params)
-
-    StatazApi.Status.list_by_count(limit, offset)
-    |> Repo.all()
-    |> response(conn, :status_count)
-  end
-
   def execute(conn, params, type, model) do
     {limit, offset} = StatazApi.Util.Params.get_limit_offset(params)
 
-    StatazApi.History.list_by(type, model, params["query"], limit, offset)
+    StatazApi.Status.list_by(type, model, "", limit, offset)
     |> Repo.all()
-    |> response(conn, :profile)
+    |> response(conn, {type, model})
   end
 
   defp response(nil, conn, _type) do
@@ -23,13 +15,13 @@ defmodule StatazApi.ListController.ActionShow do
     |> render(StatazApi.StatusView, "show.json", error: :not_found)
   end
 
-  defp response(results, conn, :profile) do
+  defp response(results, conn, {:new, _model}) do
     conn
     |> put_status(:ok)
     |> render(StatazApi.StatusView, "show.json", profile: results)
   end
 
-  defp response(results, conn, :status_count) do
+  defp response(results, conn, {:popular, :status}) do
     conn
     |> put_status(:ok)
     |> render(StatazApi.StatusView, "show.json", count: results)

@@ -18,6 +18,10 @@ defmodule StatazApi.ListControllerTest do
     user_leia = TestCommon.create_user(Repo, "leia_organa", "princess", "princess@leia.com", 2)
     user_vader = TestCommon.create_user(Repo, "darth_vader", "darksith", "darth@vader.com", 3)
 
+    # Previously active statuses should not cause user duplicates
+    TestCommon.create_status(Repo, user_luke.id, @status_1.description, @status_1.active, true)
+    TestCommon.create_status(Repo, user_luke.id, @status_3.description, @status_3.active, true)
+
     luke_active_status = TestCommon.create_status(Repo, user_luke.id, @status_2.description, @status_2.active)
     han_active_status = TestCommon.create_status(Repo, user_han.id, @status_2.description, @status_2.active)
     leia_active_status = TestCommon.create_status(Repo, user_leia.id, @status_2.description, @status_2.active)
@@ -85,6 +89,10 @@ defmodule StatazApi.ListControllerTest do
     user_han = TestCommon.create_user(Repo, "han_solo", "smuggler", "han@solo.com", 1)
     user_leia = TestCommon.create_user(Repo, "leia_organa", "princess", "princess@leia.com", 2)
     user_vader = TestCommon.create_user(Repo, "darth_vader", "darksith", "darth@vader.com", 3)
+
+    # Previously active statuses should not cause user duplicates
+    TestCommon.create_status(Repo, user_luke.id, @status_1.description, @status_1.active, true)
+    TestCommon.create_status(Repo, user_luke.id, @status_3.description, @status_3.active, true)
 
     han_active_status = TestCommon.create_status(Repo, user_han.id, @status_2.description, @status_2.active)
     vader_active_status = TestCommon.create_status(Repo, user_vader.id, @status_2.description, @status_2.active)

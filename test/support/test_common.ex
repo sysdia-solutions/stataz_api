@@ -22,17 +22,19 @@ defmodule StatazApi.TestCommon do
     |> repo.insert!()
   end
 
-  def create_status(repo, user_id, description, active) do
+  def create_status(repo, user_id, description, active, force_history \\ false) do
     StatazApi.Status.changeset(%StatazApi.Status{}, %{user_id: user_id, description: description, active: active})
     |> repo.insert!()
-    |> create_history(repo, user_id)
+    |> create_history(repo, user_id, force_history)
   end
 
-  def create_history({:error, _changeset}, _repo, _user_id) do
+  def create_history(result, repo, user_id, force_active \\ false)
+
+  def create_history({:error, _changeset}, _repo, _user_id, _force_active) do
   end
 
-  def create_history(status = %StatazApi.Status{}, repo, user_id) do
-    if status.active do
+  def create_history(status = %StatazApi.Status{}, repo, user_id, force_active) do
+    if status.active || force_active do
       StatazApi.History.changeset(%StatazApi.History{}, %{user_id: user_id, description: status.description})
       |> repo.insert!()
     end

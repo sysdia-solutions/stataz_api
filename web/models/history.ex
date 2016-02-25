@@ -40,23 +40,6 @@ defmodule StatazApi.History do
     preload: [:user]
   end
 
-  def list_by(:new, :user, _query, limit, offset) do
-    from h in StatazApi.History,
-    join: u in StatazApi.User, on: u.id == h.user_id,
-    order_by: [desc: u.inserted_at, desc: h.inserted_at, desc: h.id],
-    limit: ^limit,
-    offset: ^offset,
-    preload: [:user]
-  end
-
-  def list_by(:new, :status, _query, limit, offset) do
-    from h in StatazApi.History,
-    order_by: [desc: h.inserted_at, desc: h.id],
-    limit: ^limit,
-    offset: ^offset,
-    preload: [:user]
-  end
-
   def changeset(model, params \\ :empty) do
     model
     |> cast(params, @required_fields, @optional_fields)

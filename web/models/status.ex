@@ -27,7 +27,29 @@ defmodule StatazApi.Status do
     where: s.id == ^id and s.active == ^active
   end
 
-  def list_by_count(limit \\ 10, offset \\ 0) do
+  def list_by(type, model, query, limit \\ 10, offset \\ 0)
+
+  def list_by(:new, :user, _query, limit, offset) do
+    from s in StatazApi.Status,
+    join: u in StatazApi.User, on: u.id == s.user_id,
+    where: s.active == true,
+    order_by: [desc: u.inserted_at],
+    limit: ^limit,
+    offset: ^offset,
+    preload: [:user]
+  end
+
+  def list_by(:new, :status, _query, limit, offset) do
+    from s in StatazApi.Status,
+    join: u in StatazApi.User, on: u.id == s.user_id,
+    where: s.active == true,
+    order_by: [desc: s.updated_at, desc: s.id],
+    limit: ^limit,
+    offset: ^offset,
+    preload: [:user]
+  end
+
+  def list_by(:popular, :status, _query, limit, offset) do
     from s in StatazApi.Status,
     where: s.active == true,
     group_by: s.description,
