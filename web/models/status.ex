@@ -64,7 +64,6 @@ defmodule StatazApi.Status do
 
   def list_by(:new, :status, _query, limit, offset) do
     from s in StatazApi.Status,
-    join: u in StatazApi.User, on: u.id == s.user_id,
     where: s.active == true,
     order_by: [desc: s.updated_at, desc: s.id],
     limit: ^limit,
