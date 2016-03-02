@@ -3,7 +3,7 @@ defmodule StatazApi.FollowController.ActionCreate do
   alias StatazApi.Follow
 
   def execute(conn, %{"username" => username}) do
-    Repo.get_by(StatazApi.User, %{username: username})
+    Repo.get_by(StatazApi.User, %{username: String.downcase(username)})
     |> create(conn.assigns.current_user)
     |> response(conn)
   end
