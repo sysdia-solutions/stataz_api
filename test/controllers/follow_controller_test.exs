@@ -206,7 +206,8 @@ defmodule StatazApi.FollowControllerTest do
     r2d2_follows_luke = TestCommon.create_follow(user_r2d2.id, user_luke.id, Repo)
     c3po_follows_luke = TestCommon.create_follow(user_c3po.id, user_luke.id, Repo)
 
-    conn = get(conn, follow_path(conn, :public_show, @user_luke.username))
+    #ensure it's case insensitive
+    conn = get(conn, follow_path(conn, :public_show, @user_luke.username |> String.upcase()))
 
     expected =  %{
                   "following" =>

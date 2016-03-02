@@ -3,7 +3,7 @@ defmodule StatazApi.FollowController.ActionShow do
   alias StatazApi.Follow
 
   def execute(conn, %{"username" => username}) do
-    Repo.get_by(StatazApi.User, %{username: username})
+    Repo.get_by(StatazApi.User, %{username: String.downcase(username)})
     |> show(conn)
   end
 
