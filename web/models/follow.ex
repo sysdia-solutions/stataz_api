@@ -21,7 +21,7 @@ defmodule StatazApi.Follow do
     join: s in StatazApi.Status, on: u.id == s.user_id and s.active == true,
     where: field(f, ^your_type) == ^user_id,
     order_by: [desc: f.inserted_at, desc: f.id],
-    select: {u.username, f.inserted_at, s.description}
+    select: {u.display_name, f.inserted_at, s.description}
   end
 
   def changeset(model, params \\ :empty) do

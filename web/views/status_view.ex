@@ -30,7 +30,7 @@ defmodule StatazApi.StatusView do
   end
 
   def render("profile.json", %{status: profile}) do
-    %{username: profile.user.username,
+    %{username: profile.user.display_name,
       status: profile.description,
       since: StatazApi.Util.Time.ecto_datetime_simple_format(profile.inserted_at)}
   end
