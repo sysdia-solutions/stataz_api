@@ -19,7 +19,7 @@ defmodule StatazApi.Mixfile do
   def application do
     [mod: {StatazApi, []},
      applications: [:phoenix, :phoenix_html, :cowboy, :logger, :gettext,
-                    :phoenix_ecto, :postgrex, :comeonin, :timex]]
+                    :phoenix_ecto, :postgrex, :comeonin, :timex, :corsica, :connection]]
   end
 
   # Specifies which paths to compile per environment.
@@ -39,7 +39,8 @@ defmodule StatazApi.Mixfile do
      {:cowboy, "~> 1.0"},
      {:comeonin, "~> 2.0"},
      {:timex, "~> 1.0"},
-     {:corsica, "~> 0.4.0"}]
+     {:corsica, "~> 0.4.0"},
+     {:exrm, "~> 1.0"}]
   end
 
   # Aliases are shortcut or tasks specific to the current project.
